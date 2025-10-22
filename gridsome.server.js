@@ -5,20 +5,19 @@
 // Changes here require a server restart.
 // To restart press CTRL + C in terminal and run `gridsome develop`
 
-const axios = require('axios');
-const oauth = require('axios-oauth-client');
-const slugify = require('slugify');
+const axios = require("axios");
+const oauth = require("axios-oauth-client");
+const slugify = require("slugify");
 
-module.exports = function (api) {
-    api.loadSource(async store => {
-
+module.exports = function(api) {
+    api.loadSource(async (store) => {
         // Get OAuth 2 token
         const getClientCredentials = await oauth.client(axios.create(), {
             url: process.env.API_TOKEN_URL,
-            grant_type: 'client_credentials',
+            grant_type: "client_credentials",
             client_id: process.env.CLIENT_ID,
             client_secret: process.env.CLIENT_SECRET,
-            scope: 'officernd.api.read'
+            scope: "officernd.api.read",
         });
 
         const auth = await getClientCredentials();
@@ -27,53 +26,50 @@ module.exports = function (api) {
         const headerAuth = `Bearer ${auth.access_token}`;
 
         // Get member data
-        const {
-            data: member
-        } = await axios.get(process.env.API_MEMBERS_URL, {
+        const { data: member } = await axios.get(process.env.API_MEMBERS_URL, {
             headers: {
-                Authorization: headerAuth
-            }
+                Authorization: headerAuth,
+            },
         });
 
         // Get team data
-        const {
-            data: team
-        } = await axios.get(process.env.API_TEAMS_URL, {
+        const { data: team } = await axios.get(process.env.API_TEAMS_URL, {
             headers: {
-                Authorization: headerAuth
-            }
+                Authorization: headerAuth,
+            },
         });
 
         // create members collection
-        const members = store.addCollection('Member');
+        const members = store.addCollection("Member");
 
         // create teams collection
-        const teams = store.addCollection('Team');
+        const teams = store.addCollection("Team");
 
         // function to set priority so that profiles with images is shown before those without
-        const setPriority = url => {
-
+        const setPriority = (url) => {
             let priority = 3;
 
             if (typeof url == "string") {
-                priority = url.startsWith("//") ? 1 : url.startsWith("http://pbs.twimg.com/") ? 1 : 2;
+                priority = url.startsWith("//")
+                    ? 1
+                    : url.startsWith("http://pbs.twimg.com/")
+                    ? 1
+                    : 2;
             }
             return priority;
         };
 
-        const isProfileHidden = item => {
-
+        const isProfileHidden = (item) => {
             // checks if the object exist as it registers as undefined if the user hasn't logget into the portal
             if (typeof item === "undefined") {
                 return false;
             } else {
-                return hide = item.hide ? true : false;
+                return (hide = item.hide ? true : false);
             }
             return false;
         };
 
-        const getPrivacyOptions = item => {
-
+        const getPrivacyOptions = (item) => {
             let obj = {};
 
             // checks if the object exist as it registers as undefined if the user hasn't logget into the portal
@@ -88,33 +84,45 @@ module.exports = function (api) {
             }
         };
 
-        const getSDGs = item => {
-
+        const getSDGs = (item) => {
             let obj = [];
 
             // checks if the object exist as it registers as undefined if no custom properties has been set
             if (typeof item !== "undefined") {
-                if (item.sdg && item.sdg.length > 0)
-                    obj = item.sdg;
+                if (item.sdg && item.sdg.length > 0) obj = item.sdg;
             }
             return obj;
         };
 
         // function to fix urls without http(s)
-        const fixUrl = item => {
+        const fixUrl = (item) => {
             if (item) {
                 return item.startsWith("http") ? item : "//" + item;
             } else return;
         };
 
+        //function to create the correct image url
+        const getCleanImage = (item) => {
+            let cleanImageUrl =
+                "https://cdn.prod.website-files.com/633d71ff5625100570e7e68c/68f8d711d95a532bded7c6c3_default.png";
+            if (item != null) {
+                cleanImageUrl =
+                    "https://ik.imagekit.io/socentral/" +
+                    item.replace(/^.*cloudfront\.net\//, "") +
+                    "?tr=h-640";
+            }
+            return cleanImageUrl;
+            console.log(cleanImageUrl);
+        };
 
         // store data in members collection by iterating member data
         for (const item of member) {
-
             // skip member if privacy is set to hidden
             if (isProfileHidden(item.portalPrivacy)) {
                 continue;
             }
+            // gets the url of the image
+            const memberImage = getCleanImage(item.image);
 
             // gets the privacy options
             const privacyOptions = getPrivacyOptions(item.portalPrivacy);
@@ -123,25 +131,26 @@ module.exports = function (api) {
             let memberPriority = setPriority(item.image);
 
             // gets the topic tags
-           // let topicTags = getTopics(item.properties);
+            // let topicTags = getTopics(item.properties);
             let sdg = getSDGs(item.properties);
 
             // slugify the member name to use as route
             let slug = slugify(item.name, {
                 lower: true,
-                remove: /[*+~.()/'"?!:@]/g
+                remove: /[*+~.()/'"?!:@]/g,
             });
             let teamSlug = slugify(item.team.name, {
                 lower: true,
-                remove: /[*+~.()/'"?!:@]/g
+                remove: /[*+~.()/'"?!:@]/g,
             });
+
             // add values to the members collection
             members.addNode({
                 slug: slug,
                 name: item.name,
                 email: item.email,
                 phone: item.phone,
-                image: process.env.API_IMAGES_TOKEN + "/height/640/tjpg/" + item.image,
+                image: memberImage,
                 priority: memberPriority,
                 tags: item.tags,
                 created: item.createdAt,
@@ -151,17 +160,19 @@ module.exports = function (api) {
                 linkedin: item.linkedin,
                 privacy: privacyOptions,
                 teamName: item.team.name,
-                teamSlug: teamSlug
+                teamSlug: teamSlug,
             });
         }
 
         // store data in teams collection by iterating team data
         for (const item of team) {
-
             // skip team if privacy is set to hidden
             if (isProfileHidden(item.portalPrivacy)) {
                 continue;
             }
+
+            // gets the url of the image
+            const teamImage = getCleanImage(item.image);
 
             // gets the privacy options
             const privacyOptions = getPrivacyOptions(item.portalPrivacy);
@@ -172,11 +183,11 @@ module.exports = function (api) {
             // slugify the team name to use as route
             let slug = slugify(item.name, {
                 lower: true,
-                remove: /[*+~.()/'"?!:@]/g
+                remove: /[*+~.()/'"?!:@]/g,
             });
 
             // gets the topic tags
-           // let topicTags = getTopics(item.properties);
+            // let topicTags = getTopics(item.properties);
             let sdg = getSDGs(item.properties);
 
             // fix urls withour http(s)://
@@ -186,7 +197,6 @@ module.exports = function (api) {
             const memberProps = {};
             memberProps.members = [];
             for (const mItem of member) {
-
                 // console.log(mItem.team._id);
                 // skip the iteration if the member privacy is set to hidden
                 if (isProfileHidden(mItem.portalPrivacy)) {
@@ -196,12 +206,12 @@ module.exports = function (api) {
                 if (mItem.team._id === item._id) {
                     let memberSlug = slugify(mItem.name, {
                         lower: true,
-                        remove: /[*+~.()/'"?!:@]/g
+                        remove: /[*+~.()/'"?!:@]/g,
                     });
 
                     memberProps.members.push({
                         name: mItem.name,
-                        slug: memberSlug
+                        slug: memberSlug,
                     });
                 }
             }
@@ -213,11 +223,11 @@ module.exports = function (api) {
                 bio: item.description,
                 twitter: item.twitterHandle,
                 url: fixedUrl,
-                image: process.env.API_IMAGES_TOKEN + "/height/640/tjpg/" + item.image,
+                image: teamImage,
                 sdgs: sdg,
                 priority: teamPriority,
                 privacy: privacyOptions,
-                teamMembers: memberProps
+                teamMembers: memberProps,
             });
         }
     });

@@ -8,6 +8,8 @@ Parent Task: astro-migration-001
 - **TypeScript**: Using Astro's strict preset via `astro/tsconfigs/strict`. Path aliases configured with `@/*` -> `src/*`
 - **Environment Variables**: Typed in `src/env.d.ts`, example values in `.env.example`
 - **Tailwind**: Using v3.4 with `@astrojs/tailwind` integration. Custom fonts (Poppins, Crimson Pro) in extend block
+- **Types**: All API and transformed data types in `src/lib/types.ts`. Use `Api*` prefix for raw API types, `Transformed*` for processed data
+- **Privacy Field Inversion**: Flex 2 API uses `isVisible`/`showContactDetails`/`showSocialProfiles` (positive) but templates use `hide`/`hideContactDetails`/`hidePublicProfiles` (negative) - invert when transforming
 
 ---
 
@@ -34,5 +36,25 @@ Task ID: task-001
 - Legacy Gridsome files (.vue) in src/pages cause warnings but don't break Astro build
 - Astro check reports hints for legacy JS files but these are non-blocking
 - Node 20+ required for Astro 5.x
+
+---
+
+## 2026-01-15 - Create TypeScript interfaces for API and transformed data
+Task ID: task-002
+- Created comprehensive TypeScript interfaces for the OfficeRnD Flex 2 API
+- Defined raw API interfaces: `ApiMember`, `ApiCompany`, `ApiPaginatedResponse<T>`
+- Defined transformed data interfaces: `TransformedMember`, `TransformedCompany`
+- Created utility types: `PortalPrivacy`, `SocialProfiles`, `ApiProperties`, `MemberStatus`, `CompanyStatus`
+- Added collection entry types for future Astro content collections
+- All interfaces use strict typing with no `any` types
+- **Files created:**
+  - `src/lib/types.ts` - All API and transformed data type definitions
+  - `src/lib/AGENTS.md` - Guidelines for the lib directory
+
+**Learnings for future iterations:**
+- The Flex 2 API uses `socialProfiles` object instead of separate `twitterHandle`/`linkedin` fields, but legacy fields may still exist in responses
+- Privacy fields in Flex 2 API use positive logic (`isVisible`, `showContactDetails`) while templates use negative logic (`hide`, `hideContactDetails`) - must invert when transforming
+- The `properties` object is flexible with an index signature for custom fields, but `sdg` is a known array field
+- Legacy `.vue` files trigger warnings about `@astrojs/vue` package but these are non-blocking since they will be migrated
 
 ---

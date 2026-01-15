@@ -1,0 +1,148 @@
+{
+  "repoURL": "https://github.com/SoCentral/somembers",
+  "parentTask": {
+    "id": "astro-migration-001",
+    "title": "Astro Migration & OfficeRnD Flex 2 API Update",
+    "description": "Migrate SoMembers from Gridsome/Vue to Astro/TypeScript and update OfficeRnD integration to Flex 2 API",
+    "status": "open",
+    "createdAt": "2026-01-15"
+  },
+  "tasks": [
+    {
+      "id": "task-001",
+      "title": "Initialize Astro project with TypeScript and Tailwind",
+      "description": "Set up the Astro project foundation.\n\n**What to do:**\n- Initialize new Astro project in current directory (alongside existing files)\n- Configure TypeScript strict mode in tsconfig.json\n- Install and configure @astrojs/tailwind\n- Set up environment variable handling (.env.example with required vars)\n- Configure astro.config.mjs with static output\n- Update package.json scripts (dev, build, preview, typecheck)\n\n**Files to create:**\n- astro.config.mjs\n- tsconfig.json (Astro format)\n- src/env.d.ts\n- .env.example\n\n**Acceptance criteria:**\n- npm install completes without errors\n- npm run dev starts Astro dev server\n- npm run build generates static output\n- npm run typecheck passes\n\n**Notes:**\n- Keep existing Gridsome files for now (cleanup is a separate task)\n- Use Astro's recommended TypeScript strict preset",
+      "status": "completed",
+      "dependsOn": [],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-002",
+      "title": "Create TypeScript interfaces for API and transformed data",
+      "description": "Define TypeScript interfaces for type safety throughout the codebase.\n\n**What to do:**\n- Create interfaces matching OfficeRnD Flex 2 API response structures\n- Create interfaces for transformed/processed data used in templates\n- Create utility types for privacy settings and SDG data\n\n**Files to create:**\n- src/lib/types.ts\n\n**Interfaces to define:**\n- `ApiMember` - Raw member from Flex 2 API\n- `ApiCompany` - Raw company from Flex 2 API\n- `ApiPaginatedResponse<T>` - Paginated response wrapper\n- `TransformedMember` - Processed member for templates\n- `TransformedCompany` - Processed company for templates\n- `PortalPrivacy` - Privacy settings object\n- `SocialProfiles` - Social links object\n\n**Acceptance criteria:**\n- All interfaces use strict typing (no `any`, use `unknown` where needed)\n- Interfaces match Flex 2 API documentation structure\n- npm run typecheck passes\n\n**Notes:**\n- Refer to https://developer.officernd.com/reference/memberscontroller_getitems for API structure\n- socialProfiles replaces old twitterHandle/linkedin fields",
+      "status": "open",
+      "dependsOn": ["task-001"],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-003",
+      "title": "Implement OfficeRnD Flex 2 API client",
+      "description": "Create the API client for authenticating and fetching data from OfficeRnD.\n\n**What to do:**\n- Implement OAuth 2.0 client credentials flow\n- Create fetchMembers() function with pagination support\n- Create fetchCompanies() function with pagination support\n- Handle API errors gracefully\n\n**Files to create:**\n- src/lib/api.ts\n\n**Implementation details:**\n- Token endpoint: https://identity.officernd.com/oauth/token\n- Scopes: flex.community.members.read, flex.community.companies.read\n- Members: GET https://app.officernd.com/api/v2/organizations/socentral/members\n- Companies: GET https://app.officernd.com/api/v2/organizations/socentral/companies\n- Handle pagination via $cursorNext parameter\n- Use native fetch (no axios needed)\n\n**Acceptance criteria:**\n- getAccessToken() obtains OAuth token\n- fetchMembers() returns all members (handling pagination)\n- fetchCompanies() returns all companies (handling pagination)\n- Errors throw with meaningful messages\n- npm run typecheck passes\n\n**Notes:**\n- Response format is { results: [], cursorNext, cursorPrev, rangeStart, rangeEnd }\n- Token endpoint has 5 req/min rate limit",
+      "status": "open",
+      "dependsOn": ["task-002"],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-004",
+      "title": "Create data transformation layer",
+      "description": "Transform raw API data into the format needed for rendering.\n\n**What to do:**\n- Implement transformMember() function\n- Implement transformCompany() function\n- Implement helper functions for images, slugs, privacy, SDGs\n\n**Files to create:**\n- src/lib/transform.ts\n\n**Transformation logic (from gridsome.server.js):**\n- Images: Convert CloudFront URLs to ImageKit format\n  - Pattern: https://ik.imagekit.io/socentral/ + path + ?tr=h-640\n  - Default fallback for null images\n- Slugs: Use slugify with options { lower: true, remove: /[*+~.()'\"?!:@]/g }\n- Priority: 1 for images starting with // or twitter, 2 for other images, 3 for no image\n- Privacy: Filter out items where portalPrivacy.hide is true\n- Privacy flags: Extract hideContactDetails, hidePublicProfiles\n- SDGs: Extract from properties.sdg array\n- Social: Extract from socialProfiles object\n\n**Acceptance criteria:**\n- transformMember() returns TransformedMember with all fields\n- transformCompany() returns TransformedCompany with all fields\n- Hidden profiles are filtered out\n- Image URLs are correctly transformed\n- Slugs match current site format\n- npm run typecheck passes\n\n**Notes:**\n- Install slugify package\n- Verify properties.sdg structure in actual API response",
+      "status": "open",
+      "dependsOn": ["task-003"],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-005",
+      "title": "Create BaseLayout Astro component",
+      "description": "Create the main layout component used by all pages.\n\n**What to do:**\n- Create BaseLayout.astro with HTML structure\n- Include meta tags, favicon, viewport settings\n- Add Google Fonts preconnect for Poppins and Crimson Pro\n- Create global CSS file with Tailwind imports\n\n**Files to create:**\n- src/layouts/BaseLayout.astro\n- src/styles/global.css\n\n**Layout structure (from Default.vue):**\n- DOCTYPE html with lang=\"nb\" (Norwegian)\n- Head with charset, viewport, title prop, favicon\n- Preconnect to fonts.googleapis.com and fonts.gstatic.com\n- Body with slot for page content\n- Background color: rgb(225, 225, 219)\n\n**Acceptance criteria:**\n- Layout accepts title prop\n- Fonts preconnect correctly\n- Slot renders child content\n- Global styles imported\n- npm run typecheck passes\n\n**Notes:**\n- Use Astro's built-in head management\n- Follow src/layouts/Default.vue structure",
+      "status": "open",
+      "dependsOn": ["task-001"],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-006",
+      "title": "Create ProfileCard Astro component",
+      "description": "Create the reusable card component for displaying member/team profiles.\n\n**What to do:**\n- Create ProfileCard.astro accepting profile data props\n- Display image with lazy loading\n- Display name with text truncation\n- Display team name for members (optional)\n- Link to detail page\n\n**Files to create:**\n- src/components/ProfileCard.astro\n\n**Props interface:**\n- slug: string\n- name: string\n- image: string\n- teamName?: string (only for members)\n- basePath?: string ('' for members, '/teams' for teams)\n\n**Styling (from ProfileCard.vue):**\n- Card with rounded corners, shadow\n- Image: 320px square, object-cover, lazy loading\n- Name: truncated with ellipsis if too long\n- Team name: smaller text below name\n\n**Acceptance criteria:**\n- Card displays image, name, optional team\n- Links to correct detail page\n- Images lazy load\n- Text truncates properly\n- npm run typecheck passes\n\n**Notes:**\n- Use native loading=\"lazy\" for images\n- Follow ProfileCard.vue styling",
+      "status": "open",
+      "dependsOn": ["task-005"],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-007",
+      "title": "Create utility components (TitleSection, PageSwitch)",
+      "description": "Create small utility components for page headers and navigation.\n\n**What to do:**\n- Create TitleSection.astro for page titles\n- Create PageSwitch.astro for members/teams toggle\n\n**Files to create:**\n- src/components/TitleSection.astro\n- src/components/PageSwitch.astro\n\n**TitleSection (from TitleSection.vue):**\n- Accepts title prop\n- Renders h1 with consistent styling\n- Large text, centered or left-aligned\n\n**PageSwitch (from PageSwitch.vue):**\n- Two links: Members (/) and Teams (/teams)\n- Highlight current page\n- Styled as tabs or buttons\n\n**Acceptance criteria:**\n- TitleSection renders title correctly\n- PageSwitch links work and highlight active page\n- Styling matches current site\n- npm run typecheck passes\n\n**Notes:**\n- Use Astro.url.pathname to determine active page",
+      "status": "open",
+      "dependsOn": ["task-005"],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-008",
+      "title": "Create SDG goals data file",
+      "description": "Create the data file with 17 UN Sustainable Development Goals for filtering.\n\n**What to do:**\n- Create sdg-goals.ts with goal definitions\n- Export array of goals with Norwegian names\n- Include type definitions\n\n**Files to create:**\n- src/data/sdg-goals.ts\n\n**Data structure (from filter.js):**\n- Array of 17 SDG goals\n- Each goal has: id, name (Norwegian), possibly icon/color\n- Goals: Utrydde satisfying, Utrydde sult, God helse, etc.\n\n**Acceptance criteria:**\n- All 17 UN SDGs included\n- Names in Norwegian matching current site\n- Proper TypeScript types\n- npm run typecheck passes\n\n**Notes:**\n- Copy goal names from src/filter.js\n- Add proper TypeScript interface for SDGGoal",
+      "status": "open",
+      "dependsOn": ["task-001"],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-009",
+      "title": "Build members listing page",
+      "description": "Create the main members listing page with search functionality.\n\n**What to do:**\n- Create index.astro as members listing\n- Fetch and transform members at build time\n- Render grid of ProfileCard components\n- Implement client-side search filter\n\n**Files to create:**\n- src/pages/index.astro\n\n**Implementation details:**\n- Import and call API/transform functions at top level (runs at build)\n- Sort by priority ASC, then createdAt DESC\n- Grid: CSS grid with auto-fill, minmax(320px, 1fr)\n- Search: Filter by name and teamName, case-insensitive\n- Use client-side JavaScript for search interactivity\n\n**Acceptance criteria:**\n- Page displays all non-hidden members\n- Members sorted correctly (images first)\n- Search filters members in real-time\n- Grid is responsive\n- npm run typecheck passes\n- Verify in browser: grid displays, search works\n\n**Notes:**\n- Search should be similar to current Index.vue implementation\n- Don't add SDG filtering yet (separate task)",
+      "status": "open",
+      "dependsOn": ["task-004", "task-006", "task-007"],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-010",
+      "title": "Build teams listing page",
+      "description": "Create the teams listing page with search functionality.\n\n**What to do:**\n- Create teams.astro as teams listing\n- Fetch and transform companies at build time\n- Render grid of ProfileCard components\n- Implement client-side search filter\n\n**Files to create:**\n- src/pages/teams.astro\n\n**Implementation details:**\n- Similar structure to index.astro\n- Sort by priority ASC, then createdAt DESC\n- Search: Filter by team name, case-insensitive\n- Pass basePath=\"/teams\" to ProfileCard\n\n**Acceptance criteria:**\n- Page displays all non-hidden teams\n- Teams sorted correctly (images first)\n- Search filters teams in real-time\n- Grid matches members page layout\n- npm run typecheck passes\n- Verify in browser: grid displays, search works\n\n**Notes:**\n- Reuse same grid styling as members page\n- Don't add SDG filtering yet (separate task)",
+      "status": "open",
+      "dependsOn": ["task-004", "task-006", "task-007"],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-011",
+      "title": "Create SDG filter component",
+      "description": "Create the interactive SDG filter component for listing pages.\n\n**What to do:**\n- Create SDGFilter.astro component\n- Display 17 SDG goals as toggleable chips\n- Implement client-side filtering logic\n- Add clear filter button\n\n**Files to create:**\n- src/components/SDGFilter.astro\n\n**Implementation details:**\n- Import SDG goals from data file\n- Render as clickable chips/badges\n- Track selected goals in client-side state\n- Dispatch custom event when selection changes\n- Style: chips with colors, selected state\n\n**Acceptance criteria:**\n- All 17 SDGs displayed as clickable chips\n- Clicking toggles selection state\n- Multiple SDGs can be selected\n- Clear button resets selection\n- Component dispatches filter change events\n- npm run typecheck passes\n\n**Notes:**\n- Use data attributes for filtering logic\n- Will be integrated with listings in next task",
+      "status": "open",
+      "dependsOn": ["task-008"],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-012",
+      "title": "Integrate SDG filtering into listing pages",
+      "description": "Wire up SDG filter component to members and teams listing pages.\n\n**What to do:**\n- Add SDGFilter component to index.astro\n- Add SDGFilter component to teams.astro\n- Implement filtering logic to show/hide cards\n- Combine with existing search filter\n\n**Files to modify:**\n- src/pages/index.astro\n- src/pages/teams.astro\n\n**Implementation details:**\n- Add SDG data to each ProfileCard (via data attributes)\n- Listen for SDGFilter events\n- Filter: Show items matching ANY selected SDG (OR logic)\n- Combine with search: Both filters must match\n- Empty state when no items match\n\n**Acceptance criteria:**\n- SDG filter appears on both listing pages\n- Selecting SDGs filters the grid\n- Search and SDG filters work together\n- Empty state shows when no matches\n- npm run typecheck passes\n- Verify in browser: SDG filtering works correctly\n\n**Notes:**\n- This enables the previously disabled SDG feature",
+      "status": "open",
+      "dependsOn": ["task-009", "task-010", "task-011"],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-013",
+      "title": "Build member detail pages",
+      "description": "Create dynamic routes for individual member profiles.\n\n**What to do:**\n- Create [slug].astro for member detail pages\n- Implement getStaticPaths() to generate all member pages\n- Display full member profile with all fields\n- Respect privacy settings\n\n**Files to create:**\n- src/pages/[slug].astro\n\n**Page content (from Member.vue):**\n- Profile image (large)\n- Name as heading\n- Bio/description\n- Phone and email (if hideContactDetails is false)\n- Social links from socialProfiles (if hidePublicProfiles is false)\n- Tags array\n- SDG badges\n- Link to team page\n\n**Acceptance criteria:**\n- All members have generated pages at /{slug}\n- Profile displays correctly with all fields\n- Private fields hidden when privacy flags set\n- Team link works\n- npm run typecheck passes\n- Verify in browser: member profile displays correctly\n\n**Notes:**\n- Use getStaticPaths() to generate routes at build time\n- Slugs must match current site for URL compatibility",
+      "status": "open",
+      "dependsOn": ["task-004", "task-005"],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-014",
+      "title": "Build team detail pages",
+      "description": "Create dynamic routes for individual team profiles.\n\n**What to do:**\n- Create teams/[slug].astro for team detail pages\n- Implement getStaticPaths() to generate all team pages\n- Display full team profile with member list\n- Respect privacy settings\n\n**Files to create:**\n- src/pages/teams/[slug].astro\n\n**Page content (from Team.vue):**\n- Team image (large)\n- Name as heading\n- Bio/description\n- Website URL link\n- Social links from socialProfiles (if hidePublicProfiles is false)\n- SDG badges\n- List of team members with links to their profiles\n\n**Acceptance criteria:**\n- All teams have generated pages at /teams/{slug}\n- Profile displays correctly with all fields\n- Team members listed with working links\n- Private fields hidden when privacy flags set\n- npm run typecheck passes\n- Verify in browser: team profile displays correctly\n\n**Notes:**\n- Need to associate members with their company by ID\n- Member links should use member slugs",
+      "status": "open",
+      "dependsOn": ["task-004", "task-005", "task-013"],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-015",
+      "title": "Configure Tailwind CSS styling",
+      "description": "Set up Tailwind configuration to match current site design.\n\n**What to do:**\n- Configure tailwind.config.mjs with custom settings\n- Add custom fonts (Poppins, Crimson Pro)\n- Match current color palette\n- Ensure all component styles work correctly\n\n**Files to create/modify:**\n- tailwind.config.mjs\n- src/styles/global.css (update if needed)\n\n**Configuration (from tailwind.config.js):**\n- Fonts: Poppins (sans), Crimson Pro (serif)\n- Colors: Primary blue-700, grays for text/borders\n- Background: rgb(225, 225, 219)\n- Content paths for Astro files\n\n**Acceptance criteria:**\n- Custom fonts load correctly\n- Color scheme matches current site\n- All components styled correctly\n- Responsive breakpoints work\n- npm run typecheck passes\n- Verify in browser: styling matches current site\n\n**Notes:**\n- May need to update Tailwind to v3+ (current is v1)\n- Test on mobile viewport",
+      "status": "open",
+      "dependsOn": ["task-009", "task-010", "task-013", "task-014"],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-016",
+      "title": "Configure Netlify deployment",
+      "description": "Set up Astro for Netlify static deployment.\n\n**What to do:**\n- Install and configure @astrojs/netlify adapter\n- Create/update netlify.toml if needed\n- Document required environment variables\n- Test build output\n\n**Files to modify:**\n- astro.config.mjs\n- netlify.toml (create if needed)\n- Update .env.example with final var names\n\n**Configuration:**\n- Output: static\n- Adapter: @astrojs/netlify (static mode)\n- Build command: npm run build\n- Publish directory: dist/\n\n**Environment variables for Netlify:**\n- OFFICERND_TOKEN_URL\n- OFFICERND_CLIENT_ID\n- OFFICERND_CLIENT_SECRET\n- OFFICERND_ORG_SLUG\n\n**Acceptance criteria:**\n- npm run build generates correct output in dist/\n- netlify.toml configured correctly\n- All env vars documented\n- npm run typecheck passes\n\n**Notes:**\n- Test build locally before deploying\n- May not need adapter for pure static output",
+      "status": "open",
+      "dependsOn": ["task-015"],
+      "parentId": "astro-migration-001"
+    },
+    {
+      "id": "task-017",
+      "title": "Remove Gridsome and Vue dependencies",
+      "description": "Clean up old framework files after Astro migration is complete.\n\n**What to do:**\n- Remove all Gridsome configuration files\n- Remove all Vue components\n- Remove unused dependencies from package.json\n- Update .gitignore for Astro\n\n**Files to delete:**\n- gridsome.config.js\n- gridsome.server.js\n- src/components/*.vue\n- src/layouts/*.vue (keep Astro version)\n- src/pages/*.vue\n- src/templates/*.vue\n- src/main.js\n- src/filter.js (data moved to sdg-goals.ts)\n\n**Dependencies to remove from package.json:**\n- gridsome\n- axios\n- axios-oauth-client\n- axios-token-interceptor\n- vue-lazyload\n- gridsome-plugin-tailwindcss\n- All other gridsome-* packages\n\n**Acceptance criteria:**\n- No .vue files remain in src/\n- No Gridsome references in package.json\n- npm install works\n- npm run build still works\n- npm run typecheck passes\n\n**Notes:**\n- This is the final cleanup task\n- Verify everything works before deleting\n- Commit deletions separately for easy revert if needed",
+      "status": "open",
+      "dependsOn": ["task-016"],
+      "parentId": "astro-migration-001"
+    }
+  ]
+}

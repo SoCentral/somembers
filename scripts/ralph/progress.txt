@@ -222,3 +222,23 @@ Task ID: task-009
 - Astro inline scripts run after DOM is ready - no need for DOMContentLoaded listener
 
 ---
+
+## 2026-01-15 - Build teams listing page
+Task ID: task-010
+- Built teams (companies) listing page following same structure as members page
+- Fetches both companies and members at build time (members needed for transformAllCompanies)
+- Teams sorted by priority ASC, then created DESC (images first)
+- Client-side search filtering by team name only
+- Uses ProfileCard with `basePath="/teams"` for proper routing
+- Responsive grid using same CSS Grid layout as members page
+- **Files created:**
+  - `src/pages/teams.astro` - Teams listing page
+
+**Learnings for future iterations:**
+- `transformAllCompanies(companies, members)` requires both datasets - use `Promise.all()` for parallel fetching
+- Teams page search is simpler than members (only searches by team name, not member names)
+- The `basePath` prop on ProfileCard routes to `/teams/[slug]` instead of `/[slug]`
+- Grid card class naming follows pattern: `member-card` for members, `team-card` for teams
+- Companies use `TransformedCompany.created` which maps from `company.startDate`
+
+---

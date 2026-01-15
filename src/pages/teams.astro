@@ -1,0 +1,113 @@
+---
+/**
+ * Teams Listing Page
+ *
+ * Displays all non-hidden teams (companies) in a responsive grid.
+ * Features:
+ * - Build-time data fetching from OfficeRnD API
+ * - Client-side search filtering by team name
+ * - Sorted by priority ASC, then created DESC
+ */
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import TitleSection from '@/components/TitleSection.astro';
+import PageSwitch from '@/components/PageSwitch.astro';
+import ProfileCard from '@/components/ProfileCard.astro';
+import { getConfigFromEnv, fetchCompanies, fetchMembers } from '@/lib/api';
+import { transformAllCompanies } from '@/lib/transform';
+import type { TransformedCompany } from '@/lib/types';
+
+// Fetch and transform companies at build time
+// Need both companies and members for transformAllCompanies
+const config = getConfigFromEnv();
+const [rawCompanies, rawMembers] = await Promise.all([
+  fetchCompanies(config),
+  fetchMembers(config),
+]);
+const teams = transformAllCompanies(rawCompanies, rawMembers);
+
+// Sort by priority ASC, then by created DESC
+teams.sort((a: TransformedCompany, b: TransformedCompany) => {
+  // First sort by priority (lower number = higher priority)
+  if (a.priority !== b.priority) {
+    return a.priority - b.priority;
+  }
+  // Then sort by created date (newer first)
+  // Handle undefined created dates by treating them as oldest
+  const dateA = a.created ? new Date(a.created).getTime() : 0;
+  const dateB = b.created ? new Date(b.created).getTime() : 0;
+  return dateB - dateA;
+});
+---
+
+<BaseLayout title="Virksomheter - SoCentral Members">
+  <section class="container w-full mt-20 mb-10 lg:my-10 lg:w-3/5 lg:mx-auto lg:text-center">
+    <TitleSection title="Våre virksomheter" />
+    <PageSwitch />
+    <input
+      id="search-input"
+      class="block lg:mx-auto font-sans mb-4 w-full md:w-64 border border-gray-500 rounded py-2 px-2 text-gray-800 focus:outline-none focus:border-green-900"
+      type="text"
+      placeholder="Søk"
+      aria-label="Søk i oversikten over virksomheter"
+    />
+  </section>
+
+  <section id="teams-grid" class="cards">
+    {teams.map((team: TransformedCompany) => (
+      <div
+        class="team-card"
+        data-name={team.name.toLowerCase()}
+      >
+        <ProfileCard
+          slug={team.slug}
+          name={team.name}
+          image={team.image}
+          basePath="/teams"
+        />
+      </div>
+    ))}
+  </section>
+</BaseLayout>
+
+<style>
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    justify-items: center;
+    padding: 0 1rem 2rem;
+  }
+
+  .team-card {
+    transition: opacity 0.3s ease;
+  }
+
+  .team-card.hidden {
+    display: none;
+  }
+</style>
+
+<script>
+  // Client-side search functionality
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const teamCards = document.querySelectorAll('.team-card');
+
+  function filterTeams(): void {
+    const searchTerm = searchInput.value.toLowerCase().trim();
+
+    teamCards.forEach((card) => {
+      const name = card.getAttribute('data-name') ?? '';
+
+      const matchesName = name.includes(searchTerm);
+
+      if (searchTerm === '' || matchesName) {
+        card.classList.remove('hidden');
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+  }
+
+  searchInput.addEventListener('input', filterTeams);
+</script>

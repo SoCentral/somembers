@@ -337,3 +337,25 @@ Task ID: task-014
 - Original Team.vue only showed Twitter; enhanced version shows all social profiles like member pages
 
 ---
+
+## 2026-01-15 - Configure Tailwind CSS styling
+Task ID: task-015
+- Updated tailwind.config.js with comprehensive custom settings
+- Configured custom fonts: Poppins (sans), Crimson Pro (serif) with fallbacks
+- Added custom colors: `background` and `primary` with hover variant
+- Added `bg-site` utility class for the beige background (rgb(225, 225, 219))
+- Updated BaseLayout.astro to use `bg-site` Tailwind class instead of inline style
+- Verified Tailwind CSS compiles correctly with custom config
+- **Files modified:**
+  - `tailwind.config.js` - Added colors and backgroundColor extensions
+  - `src/layouts/BaseLayout.astro` - Changed body to use `bg-site` class
+
+**Learnings for future iterations:**
+- Tailwind v3.4 ESM config (`export default`) works with `@astrojs/tailwind` integration
+- Custom background colors can be added via `backgroundColor` or `colors` in extend block
+- Use `bg-site` class pattern for semantic site-level background
+- The `primary` color object with DEFAULT allows `text-primary` and `bg-primary` without suffix
+- The `npm run build` requires OfficeRnD API credentials (.env file) - typecheck passes without them
+- Tailwind CLI can test config independently: `npx tailwindcss build -c tailwind.config.js -i src/styles/global.css -o output.css`
+
+---

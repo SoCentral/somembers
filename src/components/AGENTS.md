@@ -86,6 +86,61 @@ import PageSwitch from '@/components/PageSwitch.astro';
 <PageSwitch />
 ```
 
+### SDGFilter.astro
+Interactive filter component for Sustainable Development Goals (SDGs). Displays all 17 SDGs as toggleable chips with official UN colors.
+
+**Props:** None (imports SDG data from `@/data/sdg-goals`)
+
+**Events:**
+- `sdg-filter-change` - Custom event dispatched on `document` when selection changes
+  - `event.detail.selectedSDGs: string[]` - Array of selected SDG names
+
+**Styling notes:**
+- Chips use `--sdg-color` CSS variable for dynamic coloring
+- Unselected: white background with colored border
+- Selected: colored background with white text
+- Mobile-responsive: hides SDG names on small screens, shows only numbers
+- Clear button disabled when no filters selected
+- Uses `aria-pressed` for accessibility
+
+**Integration pattern:**
+```astro
+---
+import SDGFilter from '@/components/SDGFilter.astro';
+---
+
+<SDGFilter />
+
+<script>
+  // Listen for filter changes
+  document.addEventListener('sdg-filter-change', (event) => {
+    const { selectedSDGs } = (event as CustomEvent).detail;
+    // Filter your items based on selectedSDGs array
+    // selectedSDGs contains Norwegian SDG names matching properties.sdg values
+  });
+</script>
+```
+
+**Data attribute pattern for filtering:**
+```astro
+<!-- Card with SDG data for filtering -->
+<div class="card" data-sdgs="Utrydde fattigdom,God helse og livskvalitet">
+  ...
+</div>
+
+<script>
+  document.addEventListener('sdg-filter-change', (event) => {
+    const { selectedSDGs } = (event as CustomEvent).detail;
+    document.querySelectorAll('.card').forEach((card) => {
+      const cardSDGs = card.getAttribute('data-sdgs')?.split(',') ?? [];
+      const matches = selectedSDGs.length === 0 ||
+        selectedSDGs.some((sdg: string) => cardSDGs.includes(sdg));
+      card.classList.toggle('hidden', !matches);
+    });
+  });
+</script>
+```
+
 ## Migration Notes
 - Legacy `.vue` components remain until migration is complete
 - New Astro components should follow the same naming convention

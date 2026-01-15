@@ -1,0 +1,241 @@
+---
+/**
+ * SDG Filter Component
+ *
+ * Interactive filter for Sustainable Development Goals (SDGs).
+ * Features:
+ * - 17 SDG goals displayed as toggleable chips
+ * - Multiple selection support
+ * - Clear all button
+ * - Dispatches custom 'sdg-filter-change' event when selection changes
+ */
+
+import { sdgGoals } from '@/data/sdg-goals';
+---
+
+<div class="sdg-filter">
+  <div class="sdg-filter-header">
+    <span class="sdg-filter-label">Filtrer etter baerekraftsmål:</span>
+    <button
+      type="button"
+      id="sdg-clear-button"
+      class="sdg-clear-button"
+      aria-label="Fjern alle filtre"
+    >
+      Nullstill
+    </button>
+  </div>
+  <div class="sdg-chips" role="group" aria-label="Baerekraftsmål filter">
+    {sdgGoals.map((goal) => (
+      <button
+        type="button"
+        class="sdg-chip"
+        data-sdg-id={goal.id}
+        data-sdg-name={goal.name}
+        data-sdg-color={goal.color}
+        aria-pressed="false"
+        style={`--sdg-color: ${goal.color}`}
+      >
+        <span class="sdg-chip-number">{goal.id}</span>
+        <span class="sdg-chip-name">{goal.name}</span>
+      </button>
+    ))}
+  </div>
+</div>
+
+<style>
+  .sdg-filter {
+    margin-bottom: 1.5rem;
+  }
+
+  .sdg-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .sdg-filter-label {
+    font-family: theme('fontFamily.sans');
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .sdg-clear-button {
+    font-family: theme('fontFamily.sans');
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    background: transparent;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .sdg-clear-button:hover {
+    background: #f3f4f6;
+    color: #374151;
+  }
+
+  .sdg-clear-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .sdg-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .sdg-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    border-radius: 9999px;
+    font-family: theme('fontFamily.sans');
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid var(--sdg-color);
+    background: white;
+    color: #374151;
+  }
+
+  .sdg-chip:hover {
+    background: color-mix(in srgb, var(--sdg-color) 15%, white);
+  }
+
+  .sdg-chip[aria-pressed='true'] {
+    background: var(--sdg-color);
+    color: white;
+  }
+
+  .sdg-chip[aria-pressed='true']:hover {
+    background: color-mix(in srgb, var(--sdg-color) 85%, black);
+  }
+
+  .sdg-chip-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 9999px;
+    background: var(--sdg-color);
+    color: white;
+    font-size: 0.625rem;
+    font-weight: 700;
+  }
+
+  .sdg-chip[aria-pressed='true'] .sdg-chip-number {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .sdg-chip-name {
+    white-space: nowrap;
+  }
+
+  /* Mobile-friendly: hide names on small screens, show only numbers */
+  @media (max-width: 640px) {
+    .sdg-chip-name {
+      display: none;
+    }
+
+    .sdg-chip {
+      padding: 0.25rem;
+    }
+
+    .sdg-chip-number {
+      min-width: 1.5rem;
+      height: 1.5rem;
+      font-size: 0.75rem;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * SDG Filter Client-Side Logic
+   *
+   * Manages selection state and dispatches custom events when filters change.
+   * The 'sdg-filter-change' event contains an array of selected SDG names.
+   */
+
+  // Track selected SDG names
+  const selectedSDGs = new Set<string>();
+
+  // Get DOM elements
+  const chips = document.querySelectorAll<HTMLButtonElement>('.sdg-chip');
+  const clearButton = document.getElementById('sdg-clear-button') as HTMLButtonElement;
+
+  /**
+   * Dispatch custom event with current filter state
+   */
+  function dispatchFilterChange(): void {
+    const event = new CustomEvent('sdg-filter-change', {
+      detail: {
+        selectedSDGs: Array.from(selectedSDGs),
+      },
+      bubbles: true,
+    });
+    document.dispatchEvent(event);
+    updateClearButtonState();
+  }
+
+  /**
+   * Update clear button disabled state
+   */
+  function updateClearButtonState(): void {
+    clearButton.disabled = selectedSDGs.size === 0;
+  }
+
+  /**
+   * Toggle chip selection state
+   */
+  function toggleChip(chip: HTMLButtonElement): void {
+    const sdgName = chip.getAttribute('data-sdg-name');
+    if (!sdgName) return;
+
+    const isCurrentlySelected = chip.getAttribute('aria-pressed') === 'true';
+
+    if (isCurrentlySelected) {
+      chip.setAttribute('aria-pressed', 'false');
+      selectedSDGs.delete(sdgName);
+    } else {
+      chip.setAttribute('aria-pressed', 'true');
+      selectedSDGs.add(sdgName);
+    }
+
+    dispatchFilterChange();
+  }
+
+  /**
+   * Clear all selections
+   */
+  function clearAllSelections(): void {
+    chips.forEach((chip) => {
+      chip.setAttribute('aria-pressed', 'false');
+    });
+    selectedSDGs.clear();
+    dispatchFilterChange();
+  }
+
+  // Add click listeners to chips
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => toggleChip(chip));
+  });
+
+  // Add click listener to clear button
+  clearButton.addEventListener('click', clearAllSelections);
+
+  // Initialize clear button state
+  updateClearButtonState();
+</script>

@@ -242,3 +242,27 @@ Task ID: task-010
 - Companies use `TransformedCompany.created` which maps from `company.startDate`
 
 ---
+
+## 2026-01-15 - Create SDG filter component
+Task ID: task-011
+- Created interactive SDGFilter.astro component with all 17 UN SDGs as toggleable chips
+- Used official UN SDG colors with CSS custom property `--sdg-color` for dynamic styling
+- Implemented client-side filtering logic with Set-based state management
+- Added clear filter button with disabled state when no filters selected
+- Dispatches custom `sdg-filter-change` event on document with selectedSDGs array
+- Mobile-responsive: hides SDG names on small screens, shows only numbers
+- Full accessibility support with `aria-pressed` and `aria-label` attributes
+- **Files created:**
+  - `src/components/SDGFilter.astro` - Interactive SDG filter component
+- **Files modified:**
+  - `src/components/AGENTS.md` - Added SDGFilter documentation with integration patterns
+
+**Learnings for future iterations:**
+- Use CSS custom properties (`--sdg-color`) with inline `style` attribute for dynamic per-element colors
+- `color-mix()` CSS function allows clean hover states without JavaScript color manipulation
+- Custom events with `bubbles: true` allow flexible listener placement (on document or parent elements)
+- The `sdg-filter-change` event detail contains Norwegian SDG names matching `properties.sdg` values from API
+- For filtering: store SDG names in `data-sdgs` attribute as comma-separated string, then split and check intersection
+- Mobile-first responsive: use `@media (max-width: 640px)` to hide verbose labels, show only numbers
+
+---

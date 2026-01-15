@@ -4,7 +4,7 @@
     "id": "astro-migration-001",
     "title": "Astro Migration & OfficeRnD Flex 2 API Update",
     "description": "Migrate SoMembers from Gridsome/Vue to Astro/TypeScript and update OfficeRnD integration to Flex 2 API",
-    "status": "open",
+    "status": "completed",
     "createdAt": "2026-01-15"
   },
   "tasks": [
@@ -140,7 +140,7 @@
       "id": "task-017",
       "title": "Remove Gridsome and Vue dependencies",
       "description": "Clean up old framework files after Astro migration is complete.\n\n**What to do:**\n- Remove all Gridsome configuration files\n- Remove all Vue components\n- Remove unused dependencies from package.json\n- Update .gitignore for Astro\n\n**Files to delete:**\n- gridsome.config.js\n- gridsome.server.js\n- src/components/*.vue\n- src/layouts/*.vue (keep Astro version)\n- src/pages/*.vue\n- src/templates/*.vue\n- src/main.js\n- src/filter.js (data moved to sdg-goals.ts)\n\n**Dependencies to remove from package.json:**\n- gridsome\n- axios\n- axios-oauth-client\n- axios-token-interceptor\n- vue-lazyload\n- gridsome-plugin-tailwindcss\n- All other gridsome-* packages\n\n**Acceptance criteria:**\n- No .vue files remain in src/\n- No Gridsome references in package.json\n- npm install works\n- npm run build still works\n- npm run typecheck passes\n\n**Notes:**\n- This is the final cleanup task\n- Verify everything works before deleting\n- Commit deletions separately for easy revert if needed",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-016"],
       "parentId": "astro-migration-001"
     }

@@ -63,3 +63,47 @@ const companies = await fetchCompanies(config);
 ## API Documentation
 - Members: https://developer.officernd.com/reference/memberscontroller_getitems
 - Companies: https://developer.officernd.com/reference/companiescontroller_getitems
+
+## Data Transformation (`transform.ts`)
+
+### Usage Pattern
+```typescript
+import { transformAllMembers, transformAllCompanies } from "@/lib/transform";
+
+// Transform all data (filters hidden profiles automatically)
+const transformedMembers = transformAllMembers(apiMembers);
+const transformedCompanies = transformAllCompanies(apiCompanies, apiMembers);
+
+// Transform single items (returns null if hidden)
+const member = transformMember(apiMember);
+const company = transformCompany(apiCompany, apiMembers);
+```
+
+### Image Transformation
+- CloudFront URLs are converted to ImageKit format for optimization
+- Pattern: `https://ik.imagekit.io/socentral/` + path after cloudfront.net + `?tr=h-640`
+- Default image used when image is null/undefined
+
+### Slug Generation
+- Uses `slugify` package with options: `{ lower: true, remove: /[*+~.()/'"?!:@]/g }`
+- Must match existing site format for URL compatibility
+
+### Image Priority
+Profiles are sorted by image priority:
+- Priority 1: Protocol-relative URLs (`//...`) or Twitter profile images
+- Priority 2: Other images (http/https)
+- Priority 3: No image
+
+### Privacy Filtering
+- `isProfileHidden()` checks if profile should be excluded from public directory
+- `extractPrivacyOptions()` inverts Flex 2 API positive logic to template negative logic
+
+### Helper Functions
+- `transformImageUrl(url)` - Convert CloudFront to ImageKit URL
+- `calculateImagePriority(url)` - Get sort priority for image
+- `generateSlug(name)` - Generate URL-friendly slug
+- `isProfileHidden(privacy)` - Check if profile should be hidden
+- `extractPrivacyOptions(privacy)` - Convert API privacy to template format
+- `extractSDGs(properties)` - Extract SDG array from properties
+- `normalizeSocialProfiles(profiles, legacyTwitter, legacyLinkedin)` - Merge social profiles
+- `fixUrl(url)` - Add protocol to URLs missing it

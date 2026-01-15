@@ -20,7 +20,7 @@
       "id": "task-002",
       "title": "Create TypeScript interfaces for API and transformed data",
       "description": "Define TypeScript interfaces for type safety throughout the codebase.\n\n**What to do:**\n- Create interfaces matching OfficeRnD Flex 2 API response structures\n- Create interfaces for transformed/processed data used in templates\n- Create utility types for privacy settings and SDG data\n\n**Files to create:**\n- src/lib/types.ts\n\n**Interfaces to define:**\n- `ApiMember` - Raw member from Flex 2 API\n- `ApiCompany` - Raw company from Flex 2 API\n- `ApiPaginatedResponse<T>` - Paginated response wrapper\n- `TransformedMember` - Processed member for templates\n- `TransformedCompany` - Processed company for templates\n- `PortalPrivacy` - Privacy settings object\n- `SocialProfiles` - Social links object\n\n**Acceptance criteria:**\n- All interfaces use strict typing (no `any`, use `unknown` where needed)\n- Interfaces match Flex 2 API documentation structure\n- npm run typecheck passes\n\n**Notes:**\n- Refer to https://developer.officernd.com/reference/memberscontroller_getitems for API structure\n- socialProfiles replaces old twitterHandle/linkedin fields",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-001"],
       "parentId": "astro-migration-001"
     },
@@ -28,7 +28,7 @@
       "id": "task-003",
       "title": "Implement OfficeRnD Flex 2 API client",
       "description": "Create the API client for authenticating and fetching data from OfficeRnD.\n\n**What to do:**\n- Implement OAuth 2.0 client credentials flow\n- Create fetchMembers() function with pagination support\n- Create fetchCompanies() function with pagination support\n- Handle API errors gracefully\n\n**Files to create:**\n- src/lib/api.ts\n\n**Implementation details:**\n- Token endpoint: https://identity.officernd.com/oauth/token\n- Scopes: flex.community.members.read, flex.community.companies.read\n- Members: GET https://app.officernd.com/api/v2/organizations/socentral/members\n- Companies: GET https://app.officernd.com/api/v2/organizations/socentral/companies\n- Handle pagination via $cursorNext parameter\n- Use native fetch (no axios needed)\n\n**Acceptance criteria:**\n- getAccessToken() obtains OAuth token\n- fetchMembers() returns all members (handling pagination)\n- fetchCompanies() returns all companies (handling pagination)\n- Errors throw with meaningful messages\n- npm run typecheck passes\n\n**Notes:**\n- Response format is { results: [], cursorNext, cursorPrev, rangeStart, rangeEnd }\n- Token endpoint has 5 req/min rate limit",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-002"],
       "parentId": "astro-migration-001"
     },

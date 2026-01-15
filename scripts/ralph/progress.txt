@@ -10,6 +10,7 @@ Parent Task: astro-migration-001
 - **Tailwind**: Using v3.4 with `@astrojs/tailwind` integration. Custom fonts (Poppins, Crimson Pro) in extend block
 - **Types**: All API and transformed data types in `src/lib/types.ts`. Use `Api*` prefix for raw API types, `Transformed*` for processed data
 - **Privacy Field Inversion**: Flex 2 API uses `isVisible`/`showContactDetails`/`showSocialProfiles` (positive) but templates use `hide`/`hideContactDetails`/`hidePublicProfiles` (negative) - invert when transforming
+- **API Client**: Use `getConfigFromEnv()` for config, then `fetchMembers(config)` and `fetchCompanies(config)` for data. Pagination handled automatically.
 
 ---
 
@@ -56,5 +57,27 @@ Task ID: task-002
 - Privacy fields in Flex 2 API use positive logic (`isVisible`, `showContactDetails`) while templates use negative logic (`hide`, `hideContactDetails`) - must invert when transforming
 - The `properties` object is flexible with an index signature for custom fields, but `sdg` is a known array field
 - Legacy `.vue` files trigger warnings about `@astrojs/vue` package but these are non-blocking since they will be migrated
+
+---
+
+## 2026-01-15 - Implement OfficeRnD Flex 2 API client
+Task ID: task-003
+- Implemented OAuth 2.0 client credentials flow with automatic token caching
+- Created `fetchMembers()` function with automatic pagination via `$cursorNext`
+- Created `fetchCompanies()` function with automatic pagination via `$cursorNext`
+- Added `ApiError` custom error class with status code and endpoint info
+- Added `getConfigFromEnv()` helper for reading environment variables
+- Uses native `fetch` (no axios dependency)
+- **Files created:**
+  - `src/lib/api.ts` - OfficeRnD API client with authentication and data fetching
+- **Files modified:**
+  - `src/lib/AGENTS.md` - Added API client documentation and usage patterns
+
+**Learnings for future iterations:**
+- TypeScript has trouble inferring types in `do-while` loops with generics - use explicit type annotations inside loops
+- Token caching is essential due to 5 req/min rate limit on token endpoint
+- The Flex 2 API uses `$cursorNext` query parameter (with dollar sign) for pagination
+- Response format is `{ results: T[], cursorNext?, cursorPrev?, rangeStart, rangeEnd }`
+- Native `fetch` works well in Astro - no need for axios
 
 ---

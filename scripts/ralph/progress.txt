@@ -313,3 +313,27 @@ Task ID: task-013
 - All social profile fields (twitter, linkedin, instagram, facebook) come from `member.socialProfiles`
 
 ---
+
+## 2026-01-15 - Build team detail pages
+Task ID: task-014
+- Created dynamic route `teams/[slug].astro` for individual team (company) profiles
+- Implemented `getStaticPaths()` with `Promise.all()` to fetch both companies and members in parallel
+- Displays full team profile: name heading, large logo image (object-contain), bio/description
+- Website URL link with external link icon (opens in new tab with rel="noopener noreferrer")
+- Social links (Twitter, LinkedIn, Instagram, Facebook) shown when `hidePublicProfiles` is false
+- SDG badges displayed with official UN colors using `getSDGsByNames()` helper
+- Lists all team members as blue clickable pills linking to their individual `/[slug]` pages
+- Back link to teams listing page at top
+- Uses same card-img dimensions (320x320) as member detail page for consistency
+- **Files created:**
+  - `src/pages/teams/[slug].astro` - Team detail page with dynamic routing
+
+**Learnings for future iterations:**
+- Team detail pages require `transformAllCompanies(companies, members)` which needs both datasets
+- Use nested route directory `teams/[slug].astro` for `/teams/{slug}` URL pattern
+- Team images use `object-contain` while member images use `object-cover` (teams = logos, members = photos)
+- External links should include `target="_blank" rel="noopener noreferrer"` for security
+- The `teamMembers` array from `TransformedCompany` already has `name` and `slug` for direct linking
+- Original Team.vue only showed Twitter; enhanced version shows all social profiles like member pages
+
+---

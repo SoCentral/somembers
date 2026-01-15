@@ -157,3 +157,27 @@ Task ID: task-006
 - Original Vue component had inverted logic: teamName presence = member, absence = team
 
 ---
+
+## 2026-01-15 - Create utility components (TitleSection, PageSwitch)
+Task ID: task-007
+- Created TitleSection.astro for consistent page header styling
+- Created PageSwitch.astro for members/teams navigation toggle
+- TitleSection accepts `title` prop and renders h1 with font-sans, text-4xl, font-bold, leading-snug
+- PageSwitch displays two tab-like links (Medlemmer, Virksomheter) with active state highlighting
+- PageSwitch uses `Astro.url.pathname` to determine current page
+- Added `aria-current="page"` for accessibility on active tab
+- Improved from original Vue component: now shows both options as tabs instead of single link
+- **Files created:**
+  - `src/components/TitleSection.astro` - Page title component
+  - `src/components/PageSwitch.astro` - Navigation toggle component
+- **Files modified:**
+  - `src/components/AGENTS.md` - Added documentation for both components
+
+**Learnings for future iterations:**
+- Use `Astro.url.pathname` to access the current URL path in Astro components
+- Check for both `/teams` and `/teams/` when comparing paths (trailing slash handling)
+- `aria-current="page"` is the proper accessibility attribute for indicating current page in navigation
+- The original PageSwitch was a single link; enhanced version shows both options as tabs with highlighting
+- `class:list` directive works well for conditional class toggling based on state
+
+---

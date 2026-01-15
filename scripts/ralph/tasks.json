@@ -44,7 +44,7 @@
       "id": "task-005",
       "title": "Create BaseLayout Astro component",
       "description": "Create the main layout component used by all pages.\n\n**What to do:**\n- Create BaseLayout.astro with HTML structure\n- Include meta tags, favicon, viewport settings\n- Add Google Fonts preconnect for Poppins and Crimson Pro\n- Create global CSS file with Tailwind imports\n\n**Files to create:**\n- src/layouts/BaseLayout.astro\n- src/styles/global.css\n\n**Layout structure (from Default.vue):**\n- DOCTYPE html with lang=\"nb\" (Norwegian)\n- Head with charset, viewport, title prop, favicon\n- Preconnect to fonts.googleapis.com and fonts.gstatic.com\n- Body with slot for page content\n- Background color: rgb(225, 225, 219)\n\n**Acceptance criteria:**\n- Layout accepts title prop\n- Fonts preconnect correctly\n- Slot renders child content\n- Global styles imported\n- npm run typecheck passes\n\n**Notes:**\n- Use Astro's built-in head management\n- Follow src/layouts/Default.vue structure",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-001"],
       "parentId": "astro-migration-001"
     },
@@ -52,7 +52,7 @@
       "id": "task-006",
       "title": "Create ProfileCard Astro component",
       "description": "Create the reusable card component for displaying member/team profiles.\n\n**What to do:**\n- Create ProfileCard.astro accepting profile data props\n- Display image with lazy loading\n- Display name with text truncation\n- Display team name for members (optional)\n- Link to detail page\n\n**Files to create:**\n- src/components/ProfileCard.astro\n\n**Props interface:**\n- slug: string\n- name: string\n- image: string\n- teamName?: string (only for members)\n- basePath?: string ('' for members, '/teams' for teams)\n\n**Styling (from ProfileCard.vue):**\n- Card with rounded corners, shadow\n- Image: 320px square, object-cover, lazy loading\n- Name: truncated with ellipsis if too long\n- Team name: smaller text below name\n\n**Acceptance criteria:**\n- Card displays image, name, optional team\n- Links to correct detail page\n- Images lazy load\n- Text truncates properly\n- npm run typecheck passes\n\n**Notes:**\n- Use native loading=\"lazy\" for images\n- Follow ProfileCard.vue styling",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-005"],
       "parentId": "astro-migration-001"
     },
@@ -60,7 +60,7 @@
       "id": "task-007",
       "title": "Create utility components (TitleSection, PageSwitch)",
       "description": "Create small utility components for page headers and navigation.\n\n**What to do:**\n- Create TitleSection.astro for page titles\n- Create PageSwitch.astro for members/teams toggle\n\n**Files to create:**\n- src/components/TitleSection.astro\n- src/components/PageSwitch.astro\n\n**TitleSection (from TitleSection.vue):**\n- Accepts title prop\n- Renders h1 with consistent styling\n- Large text, centered or left-aligned\n\n**PageSwitch (from PageSwitch.vue):**\n- Two links: Members (/) and Teams (/teams)\n- Highlight current page\n- Styled as tabs or buttons\n\n**Acceptance criteria:**\n- TitleSection renders title correctly\n- PageSwitch links work and highlight active page\n- Styling matches current site\n- npm run typecheck passes\n\n**Notes:**\n- Use Astro.url.pathname to determine active page",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-005"],
       "parentId": "astro-migration-001"
     },

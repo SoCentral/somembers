@@ -22,10 +22,3 @@ npm-debug.log*
 # IDE
 .vscode/
 .idea/
-
-# Legacy Gridsome (to be removed)
-.cache
-src/.temp
-.gqlconfig
-.jshintrc
-.tailwind.config.js

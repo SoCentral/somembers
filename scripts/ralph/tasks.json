@@ -132,7 +132,7 @@
       "id": "task-016",
       "title": "Configure Netlify deployment",
       "description": "Set up Astro for Netlify static deployment.\n\n**What to do:**\n- Install and configure @astrojs/netlify adapter\n- Create/update netlify.toml if needed\n- Document required environment variables\n- Test build output\n\n**Files to modify:**\n- astro.config.mjs\n- netlify.toml (create if needed)\n- Update .env.example with final var names\n\n**Configuration:**\n- Output: static\n- Adapter: @astrojs/netlify (static mode)\n- Build command: npm run build\n- Publish directory: dist/\n\n**Environment variables for Netlify:**\n- OFFICERND_TOKEN_URL\n- OFFICERND_CLIENT_ID\n- OFFICERND_CLIENT_SECRET\n- OFFICERND_ORG_SLUG\n\n**Acceptance criteria:**\n- npm run build generates correct output in dist/\n- netlify.toml configured correctly\n- All env vars documented\n- npm run typecheck passes\n\n**Notes:**\n- Test build locally before deploying\n- May not need adapter for pure static output",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-015"],
       "parentId": "astro-migration-001"
     },

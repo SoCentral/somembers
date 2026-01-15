@@ -388,3 +388,39 @@ Task ID: task-016
 - Use HEREDOC format in netlify.toml for multi-line values if needed
 
 ---
+
+## 2026-01-15 - Remove Gridsome and Vue dependencies
+Task ID: task-017
+- Deleted all Gridsome configuration files: `gridsome.config.js`, `gridsome.server.js`
+- Deleted legacy Vue entry files: `src/main.js`, `src/filter.js`
+- Deleted all Vue components: `PageSwitch.vue`, `ProfileCard.vue`, `TitleSection.vue`
+- Deleted Vue layout: `Default.vue`
+- Deleted Vue pages: `Index.vue`, `Teams.vue`
+- Deleted `src/templates/` directory with `Member.vue` and `Team.vue`
+- Cleaned up `.gitignore` to remove "Legacy Gridsome" section (removed `.cache`, `src/.temp`, etc.)
+- Verified no .vue files remain in src/
+- Verified typecheck passes with 0 errors
+- Verified npm install works
+- **Files deleted:**
+  - `gridsome.config.js` - Gridsome build configuration
+  - `gridsome.server.js` - Gridsome server-side data loading
+  - `src/main.js` - Vue/Gridsome entry point
+  - `src/filter.js` - SDG filter data (already migrated to `src/data/sdg-goals.ts`)
+  - `src/components/PageSwitch.vue` - Vue component (replaced by Astro version)
+  - `src/components/ProfileCard.vue` - Vue component (replaced by Astro version)
+  - `src/components/TitleSection.vue` - Vue component (replaced by Astro version)
+  - `src/layouts/Default.vue` - Vue layout (replaced by `BaseLayout.astro`)
+  - `src/pages/Index.vue` - Vue page (replaced by `index.astro`)
+  - `src/pages/Teams.vue` - Vue page (replaced by `teams.astro`)
+  - `src/templates/Member.vue` - Vue template (replaced by `[slug].astro`)
+  - `src/templates/Team.vue` - Vue template (replaced by `teams/[slug].astro`)
+- **Files modified:**
+  - `.gitignore` - Removed legacy Gridsome entries
+
+**Learnings for future iterations:**
+- Package.json was already updated in task-001 - no Gridsome dependencies remained
+- The migration was complete; this task was purely cleanup of legacy files
+- Astro warnings about missing @astrojs/vue package disappear after removing .vue files
+- Typecheck result improved from 15 files + 5 hints to 15 files + 3 hints (hints are intentional deprecated field usage)
+
+---

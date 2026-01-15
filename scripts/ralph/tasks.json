@@ -108,7 +108,7 @@
       "id": "task-013",
       "title": "Build member detail pages",
       "description": "Create dynamic routes for individual member profiles.\n\n**What to do:**\n- Create [slug].astro for member detail pages\n- Implement getStaticPaths() to generate all member pages\n- Display full member profile with all fields\n- Respect privacy settings\n\n**Files to create:**\n- src/pages/[slug].astro\n\n**Page content (from Member.vue):**\n- Profile image (large)\n- Name as heading\n- Bio/description\n- Phone and email (if hideContactDetails is false)\n- Social links from socialProfiles (if hidePublicProfiles is false)\n- Tags array\n- SDG badges\n- Link to team page\n\n**Acceptance criteria:**\n- All members have generated pages at /{slug}\n- Profile displays correctly with all fields\n- Private fields hidden when privacy flags set\n- Team link works\n- npm run typecheck passes\n- Verify in browser: member profile displays correctly\n\n**Notes:**\n- Use getStaticPaths() to generate routes at build time\n- Slugs must match current site for URL compatibility",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-004", "task-005"],
       "parentId": "astro-migration-001"
     },
@@ -116,7 +116,7 @@
       "id": "task-014",
       "title": "Build team detail pages",
       "description": "Create dynamic routes for individual team profiles.\n\n**What to do:**\n- Create teams/[slug].astro for team detail pages\n- Implement getStaticPaths() to generate all team pages\n- Display full team profile with member list\n- Respect privacy settings\n\n**Files to create:**\n- src/pages/teams/[slug].astro\n\n**Page content (from Team.vue):**\n- Team image (large)\n- Name as heading\n- Bio/description\n- Website URL link\n- Social links from socialProfiles (if hidePublicProfiles is false)\n- SDG badges\n- List of team members with links to their profiles\n\n**Acceptance criteria:**\n- All teams have generated pages at /teams/{slug}\n- Profile displays correctly with all fields\n- Team members listed with working links\n- Private fields hidden when privacy flags set\n- npm run typecheck passes\n- Verify in browser: team profile displays correctly\n\n**Notes:**\n- Need to associate members with their company by ID\n- Member links should use member slugs",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-004", "task-005", "task-013"],
       "parentId": "astro-migration-001"
     },
@@ -124,7 +124,7 @@
       "id": "task-015",
       "title": "Configure Tailwind CSS styling",
       "description": "Set up Tailwind configuration to match current site design.\n\n**What to do:**\n- Configure tailwind.config.mjs with custom settings\n- Add custom fonts (Poppins, Crimson Pro)\n- Match current color palette\n- Ensure all component styles work correctly\n\n**Files to create/modify:**\n- tailwind.config.mjs\n- src/styles/global.css (update if needed)\n\n**Configuration (from tailwind.config.js):**\n- Fonts: Poppins (sans), Crimson Pro (serif)\n- Colors: Primary blue-700, grays for text/borders\n- Background: rgb(225, 225, 219)\n- Content paths for Astro files\n\n**Acceptance criteria:**\n- Custom fonts load correctly\n- Color scheme matches current site\n- All components styled correctly\n- Responsive breakpoints work\n- npm run typecheck passes\n- Verify in browser: styling matches current site\n\n**Notes:**\n- May need to update Tailwind to v3+ (current is v1)\n- Test on mobile viewport",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-009", "task-010", "task-013", "task-014"],
       "parentId": "astro-migration-001"
     },

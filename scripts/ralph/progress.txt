@@ -359,3 +359,32 @@ Task ID: task-015
 - Tailwind CLI can test config independently: `npx tailwindcss build -c tailwind.config.js -i src/styles/global.css -o output.css`
 
 ---
+
+## 2026-01-15 - Configure Netlify deployment
+Task ID: task-016
+- Created netlify.toml with complete build configuration
+- Configured build command: `npm run build`
+- Configured publish directory: `dist/`
+- Set Node.js version to 20 (matching package.json engines)
+- Added trailing slash redirect (301) to clean URLs
+- Added cache headers for static assets (_assets/, .css, .js) with 1-year max-age and immutable
+- Added security headers: X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+- Updated .env.example with comprehensive documentation for Netlify deployment
+- Removed unused OFFICERND_API_URL from env.d.ts (URL is hardcoded in api.ts)
+- No @astrojs/netlify adapter needed - pure static output works without it
+- **Files created:**
+  - `netlify.toml` - Netlify build and deployment configuration
+- **Files modified:**
+  - `.env.example` - Added Netlify deployment instructions, documented actual required vars
+  - `src/env.d.ts` - Removed unused OFFICERND_API_URL
+
+**Learnings for future iterations:**
+- Pure static Astro sites (`output: 'static'`) don't need the @astrojs/netlify adapter
+- The @astrojs/netlify adapter is only required for SSR or hybrid rendering modes
+- Netlify build requires env vars set in Netlify UI: Site settings > Environment variables
+- Token URL and API base URL are hardcoded constants in api.ts - no env vars needed for them
+- Typecheck passes without env vars, but build fails (expected - needs API credentials)
+- Build outputs to `dist/` with `_assets/` subdirectory for hashed static files
+- Use HEREDOC format in netlify.toml for multi-line values if needed
+
+---

@@ -288,3 +288,28 @@ Task ID: task-012
 - Combined filters pattern: check each filter condition independently, then AND them together
 
 ---
+
+## 2026-01-15 - Build member detail pages
+Task ID: task-013
+- Created dynamic route `[slug].astro` for individual member profiles
+- Implemented `getStaticPaths()` to generate all member pages at build time
+- Displays full member profile: name heading, team link, large profile image, bio text
+- Respects privacy settings: contact details (phone/email) hidden when `hideContactDetails` is true
+- Respects privacy settings: social profiles hidden when `hidePublicProfiles` is true
+- Shows social links for Twitter, LinkedIn, Instagram, and Facebook (if available and visible)
+- SDG badges displayed with official UN colors using `getSDGsByNames()` helper
+- Tags displayed as gray pills similar to original Member.vue template
+- Team link navigates to `/teams/{teamSlug}` for viewing company details
+- Back link to members listing at top of page
+- **Files created:**
+  - `src/pages/[slug].astro` - Member detail page with dynamic routing
+
+**Learnings for future iterations:**
+- Use `getStaticPaths()` returning `{ params, props }` for dynamic routes in Astro
+- The member object is passed via props from getStaticPaths, no need to re-fetch in component
+- SDG colors can be applied with inline `style` attribute using `background-color: ${sdg.color}`
+- The original Member.vue used `$page.member` from GraphQL - in Astro use `Astro.props`
+- Privacy checks use the transformed `privacy.hideContactDetails` and `privacy.hidePublicProfiles` fields
+- All social profile fields (twitter, linkedin, instagram, facebook) come from `member.socialProfiles`
+
+---

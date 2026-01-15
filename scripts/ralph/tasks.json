@@ -76,7 +76,7 @@
       "id": "task-009",
       "title": "Build members listing page",
       "description": "Create the main members listing page with search functionality.\n\n**What to do:**\n- Create index.astro as members listing\n- Fetch and transform members at build time\n- Render grid of ProfileCard components\n- Implement client-side search filter\n\n**Files to create:**\n- src/pages/index.astro\n\n**Implementation details:**\n- Import and call API/transform functions at top level (runs at build)\n- Sort by priority ASC, then createdAt DESC\n- Grid: CSS grid with auto-fill, minmax(320px, 1fr)\n- Search: Filter by name and teamName, case-insensitive\n- Use client-side JavaScript for search interactivity\n\n**Acceptance criteria:**\n- Page displays all non-hidden members\n- Members sorted correctly (images first)\n- Search filters members in real-time\n- Grid is responsive\n- npm run typecheck passes\n- Verify in browser: grid displays, search works\n\n**Notes:**\n- Search should be similar to current Index.vue implementation\n- Don't add SDG filtering yet (separate task)",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-004", "task-006", "task-007"],
       "parentId": "astro-migration-001"
     },
@@ -84,7 +84,7 @@
       "id": "task-010",
       "title": "Build teams listing page",
       "description": "Create the teams listing page with search functionality.\n\n**What to do:**\n- Create teams.astro as teams listing\n- Fetch and transform companies at build time\n- Render grid of ProfileCard components\n- Implement client-side search filter\n\n**Files to create:**\n- src/pages/teams.astro\n\n**Implementation details:**\n- Similar structure to index.astro\n- Sort by priority ASC, then createdAt DESC\n- Search: Filter by team name, case-insensitive\n- Pass basePath=\"/teams\" to ProfileCard\n\n**Acceptance criteria:**\n- Page displays all non-hidden teams\n- Teams sorted correctly (images first)\n- Search filters teams in real-time\n- Grid matches members page layout\n- npm run typecheck passes\n- Verify in browser: grid displays, search works\n\n**Notes:**\n- Reuse same grid styling as members page\n- Don't add SDG filtering yet (separate task)",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-004", "task-006", "task-007"],
       "parentId": "astro-migration-001"
     },
@@ -92,7 +92,7 @@
       "id": "task-011",
       "title": "Create SDG filter component",
       "description": "Create the interactive SDG filter component for listing pages.\n\n**What to do:**\n- Create SDGFilter.astro component\n- Display 17 SDG goals as toggleable chips\n- Implement client-side filtering logic\n- Add clear filter button\n\n**Files to create:**\n- src/components/SDGFilter.astro\n\n**Implementation details:**\n- Import SDG goals from data file\n- Render as clickable chips/badges\n- Track selected goals in client-side state\n- Dispatch custom event when selection changes\n- Style: chips with colors, selected state\n\n**Acceptance criteria:**\n- All 17 SDGs displayed as clickable chips\n- Clicking toggles selection state\n- Multiple SDGs can be selected\n- Clear button resets selection\n- Component dispatches filter change events\n- npm run typecheck passes\n\n**Notes:**\n- Use data attributes for filtering logic\n- Will be integrated with listings in next task",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-008"],
       "parentId": "astro-migration-001"
     },
@@ -100,7 +100,7 @@
       "id": "task-012",
       "title": "Integrate SDG filtering into listing pages",
       "description": "Wire up SDG filter component to members and teams listing pages.\n\n**What to do:**\n- Add SDGFilter component to index.astro\n- Add SDGFilter component to teams.astro\n- Implement filtering logic to show/hide cards\n- Combine with existing search filter\n\n**Files to modify:**\n- src/pages/index.astro\n- src/pages/teams.astro\n\n**Implementation details:**\n- Add SDG data to each ProfileCard (via data attributes)\n- Listen for SDGFilter events\n- Filter: Show items matching ANY selected SDG (OR logic)\n- Combine with search: Both filters must match\n- Empty state when no items match\n\n**Acceptance criteria:**\n- SDG filter appears on both listing pages\n- Selecting SDGs filters the grid\n- Search and SDG filters work together\n- Empty state shows when no matches\n- npm run typecheck passes\n- Verify in browser: SDG filtering works correctly\n\n**Notes:**\n- This enables the previously disabled SDG feature",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-009", "task-010", "task-011"],
       "parentId": "astro-migration-001"
     },

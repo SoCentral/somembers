@@ -1,11 +1,31 @@
-*.log
-.cache
-.DS_Store
-src/.temp
-node_modules
-dist
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Astro
+.astro/
+
+# Environment variables
 .env
-.env.*
+.env.local
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Legacy Gridsome (to be removed)
+.cache
+src/.temp
 .gqlconfig
 .jshintrc
 .tailwind.config.js

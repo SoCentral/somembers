@@ -1,0 +1,38 @@
+# Ralph Progress Log
+Started: 2026-01-15
+Feature: Astro Migration & OfficeRnD Flex 2 API Update
+Parent Task: astro-migration-001
+
+## Codebase Patterns
+- **Astro Config**: Static output mode with Tailwind integration. Config at `astro.config.mjs`
+- **TypeScript**: Using Astro's strict preset via `astro/tsconfigs/strict`. Path aliases configured with `@/*` -> `src/*`
+- **Environment Variables**: Typed in `src/env.d.ts`, example values in `.env.example`
+- **Tailwind**: Using v3.4 with `@astrojs/tailwind` integration. Custom fonts (Poppins, Crimson Pro) in extend block
+
+---
+
+## 2026-01-15 - Initialize Astro project with TypeScript and Tailwind
+Task ID: task-001
+- Replaced Gridsome dependencies with Astro 5.x stack
+- Configured TypeScript strict mode via Astro's recommended preset
+- Set up @astrojs/tailwind integration
+- Created typed environment variable definitions for OfficeRnD API
+- Updated tailwind.config.js for Tailwind v3 with ESM syntax
+- Created minimal index.astro page to verify build works
+- **Files created:**
+  - `astro.config.mjs` - Astro config with static output
+  - `tsconfig.json` - TypeScript config extending Astro strict preset
+  - `src/env.d.ts` - Environment variable type definitions
+  - `src/pages/index.astro` - Minimal placeholder page
+  - `.env.example` - Environment variable template
+- **Files modified:**
+  - `package.json` - Complete rewrite for Astro dependencies
+  - `tailwind.config.js` - Updated to Tailwind v3 ESM format
+  - `.gitignore` - Added Astro-specific entries
+
+**Learnings for future iterations:**
+- Legacy Gridsome files (.vue) in src/pages cause warnings but don't break Astro build
+- Astro check reports hints for legacy JS files but these are non-blocking
+- Node 20+ required for Astro 5.x
+
+---

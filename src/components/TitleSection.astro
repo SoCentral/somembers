@@ -1,0 +1,16 @@
+---
+/**
+ * TitleSection component for page headers.
+ * Renders a styled h1 element with consistent typography.
+ */
+interface Props {
+  /** The title text to display */
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<h1 class="font-sans text-4xl font-bold mb-4 lg:mb-2 leading-snug">
+  {title}
+</h1>

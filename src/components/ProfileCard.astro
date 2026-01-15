@@ -1,0 +1,68 @@
+---
+/**
+ * ProfileCard - Reusable card component for displaying member/team profiles
+ *
+ * Used on listing pages to show a clickable card with:
+ * - Profile image (lazy loaded)
+ * - Name (truncated if too long)
+ * - Team name (for members only)
+ * - Link to detail page
+ */
+
+interface Props {
+  slug: string;
+  name: string;
+  image: string;
+  teamName?: string;
+  basePath?: string;
+}
+
+const { slug, name, image, teamName, basePath = '' } = Astro.props;
+
+// Build the link path
+const href = `${basePath}/${slug}`;
+
+// Members (have teamName) use object-cover, teams use object-contain
+const objectFitClass = teamName ? 'object-cover' : 'object-contain';
+---
+
+<div class="card">
+  <a href={href} aria-label={`Les mer om ${name}`}>
+    <img
+      class:list={['card-img', 'w-full', 'rounded-lg', 'bg-white', objectFitClass]}
+      src={image}
+      alt={`Bilde av ${name}`}
+      loading="lazy"
+    />
+  </a>
+
+  <a
+    class="block font-sans text-2xl mt-3 -mb-1 font-bold cut-text"
+    href={href}
+    aria-label={`Les mer om ${name}`}
+  >
+    {name}
+  </a>
+
+  {teamName && (
+    <div class="font-sans text-base cut-text font-light">
+      {teamName}
+    </div>
+  )}
+</div>
+
+<style>
+  .card {
+    width: 320px;
+  }
+
+  .card-img {
+    height: 320px;
+  }
+
+  .cut-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>

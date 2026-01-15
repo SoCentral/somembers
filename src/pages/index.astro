@@ -1,0 +1,149 @@
+---
+/**
+ * Members Listing Page
+ *
+ * Displays all non-hidden members in a responsive grid.
+ * Features:
+ * - Build-time data fetching from OfficeRnD API
+ * - Client-side search filtering by name and team name
+ * - Sorted by priority ASC, then createdAt DESC
+ */
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import TitleSection from '@/components/TitleSection.astro';
+import PageSwitch from '@/components/PageSwitch.astro';
+import ProfileCard from '@/components/ProfileCard.astro';
+import SDGFilter from '@/components/SDGFilter.astro';
+import { getConfigFromEnv, fetchMembers } from '@/lib/api';
+import { transformAllMembers } from '@/lib/transform';
+import type { TransformedMember } from '@/lib/types';
+
+// Fetch and transform members at build time
+const config = getConfigFromEnv();
+const rawMembers = await fetchMembers(config);
+const members = transformAllMembers(rawMembers);
+
+// Sort by priority ASC, then by created DESC
+members.sort((a: TransformedMember, b: TransformedMember) => {
+  // First sort by priority (lower number = higher priority)
+  if (a.priority !== b.priority) {
+    return a.priority - b.priority;
+  }
+  // Then sort by created date (newer first)
+  // Handle undefined created dates by treating them as oldest
+  const dateA = a.created ? new Date(a.created).getTime() : 0;
+  const dateB = b.created ? new Date(b.created).getTime() : 0;
+  return dateB - dateA;
+});
+---
+
+<BaseLayout title="Hjem - SoCentral Members">
+  <section class="container w-full mt-20 mb-10 lg:my-10 lg:w-3/5 lg:mx-auto lg:text-center">
+    <TitleSection title="Våre medlemmer" />
+    <PageSwitch />
+    <input
+      id="search-input"
+      class="block lg:mx-auto font-sans mb-4 w-full md:w-64 border border-gray-500 rounded py-2 px-2 text-gray-800 focus:outline-none focus:border-green-900"
+      type="text"
+      placeholder="Søk"
+      aria-label="Søk i medlemsoversikten"
+    />
+    <SDGFilter />
+  </section>
+
+  <section id="empty-state" class="hidden text-center py-12">
+    <p class="text-gray-600 font-sans text-lg">Ingen medlemmer funnet med valgte filtre.</p>
+  </section>
+
+  <section id="members-grid" class="cards">
+    {members.map((member: TransformedMember) => (
+      <div
+        class="member-card"
+        data-name={member.name.toLowerCase()}
+        data-team={member.teamName.toLowerCase()}
+        data-sdgs={member.sdgs.join(',')}
+      >
+        <ProfileCard
+          slug={member.slug}
+          name={member.name}
+          image={member.image}
+          teamName={member.teamName}
+        />
+      </div>
+    ))}
+  </section>
+</BaseLayout>
+
+<style>
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    justify-items: center;
+    padding: 0 1rem 2rem;
+  }
+
+  .member-card {
+    transition: opacity 0.3s ease;
+  }
+
+  .member-card.hidden {
+    display: none;
+  }
+</style>
+
+<script>
+  // Client-side search and SDG filter functionality
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const memberCards = document.querySelectorAll('.member-card');
+  const membersGrid = document.getElementById('members-grid') as HTMLElement;
+  const emptyState = document.getElementById('empty-state') as HTMLElement;
+
+  // Track current SDG filter state
+  let selectedSDGs: string[] = [];
+
+  function filterMembers(): void {
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    let visibleCount = 0;
+
+    memberCards.forEach((card) => {
+      const name = card.getAttribute('data-name') ?? '';
+      const team = card.getAttribute('data-team') ?? '';
+      const cardSDGs = card.getAttribute('data-sdgs')?.split(',').filter(Boolean) ?? [];
+
+      // Search filter: match name or team
+      const matchesSearch = searchTerm === '' || name.includes(searchTerm) || team.includes(searchTerm);
+
+      // SDG filter: match ANY selected SDG (OR logic), or show all if no SDGs selected
+      const matchesSDG = selectedSDGs.length === 0 ||
+        selectedSDGs.some((sdg: string) => cardSDGs.includes(sdg));
+
+      // Both filters must match
+      if (matchesSearch && matchesSDG) {
+        card.classList.remove('hidden');
+        visibleCount++;
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+
+    // Show/hide empty state
+    if (visibleCount === 0) {
+      membersGrid.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+    } else {
+      membersGrid.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+    }
+  }
+
+  // Listen for search input
+  searchInput.addEventListener('input', filterMembers);
+
+  // Listen for SDG filter changes
+  document.addEventListener('sdg-filter-change', (event) => {
+    const customEvent = event as CustomEvent<{ selectedSDGs: string[] }>;
+    selectedSDGs = customEvent.detail.selectedSDGs;
+    filterMembers();
+  });
+</script>

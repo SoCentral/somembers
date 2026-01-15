@@ -1,0 +1,31 @@
+---
+/**
+ * PageSwitch component for navigation between Members and Teams pages.
+ * Displays two tab-like links with active state highlighting.
+ * Uses Astro.url.pathname to determine the current page.
+ */
+
+const pathname = Astro.url.pathname;
+const isTeamsPage = pathname === '/teams' || pathname === '/teams/';
+
+const baseClasses = 'font-light inline-block text-sm rounded py-1 px-2';
+const activeClasses = 'bg-gray-800 text-white';
+const inactiveClasses = 'bg-gray-200 text-gray-700 hover:bg-gray-300';
+---
+
+<nav class="mb-6 flex gap-2" aria-label="Bytt mellom medlemmer og virksomheter">
+  <a
+    href="/"
+    class:list={[baseClasses, isTeamsPage ? inactiveClasses : activeClasses]}
+    aria-current={isTeamsPage ? undefined : 'page'}
+  >
+    Medlemmer
+  </a>
+  <a
+    href="/teams"
+    class:list={[baseClasses, isTeamsPage ? activeClasses : inactiveClasses]}
+    aria-current={isTeamsPage ? 'page' : undefined}
+  >
+    Virksomheter
+  </a>
+</nav>

@@ -1,0 +1,426 @@
+# Ralph Progress Log
+Started: 2026-01-15
+Feature: Astro Migration & OfficeRnD Flex 2 API Update
+Parent Task: astro-migration-001
+
+## Codebase Patterns
+- **Astro Config**: Static output mode with Tailwind integration. Config at `astro.config.mjs`
+- **TypeScript**: Using Astro's strict preset via `astro/tsconfigs/strict`. Path aliases configured with `@/*` -> `src/*`
+- **Environment Variables**: Typed in `src/env.d.ts`, example values in `.env.example`
+- **Tailwind**: Using v3.4 with `@astrojs/tailwind` integration. Custom fonts (Poppins, Crimson Pro) in extend block
+- **Types**: All API and transformed data types in `src/lib/types.ts`. Use `Api*` prefix for raw API types, `Transformed*` for processed data
+- **Privacy Field Inversion**: Flex 2 API uses `isVisible`/`showContactDetails`/`showSocialProfiles` (positive) but templates use `hide`/`hideContactDetails`/`hidePublicProfiles` (negative) - invert when transforming
+- **API Client**: Use `getConfigFromEnv()` for config, then `fetchMembers(config)` and `fetchCompanies(config)` for data. Pagination handled automatically.
+- **Data Transform**: Use `transformAllMembers(members)` and `transformAllCompanies(companies, members)` to process API data. Hidden profiles filtered automatically.
+- **Slugify**: Use `slugify` package with `{ lower: true, remove: /[*+~.()/'"?!:@]/g }` to match existing URL format
+- **Layouts**: Use `BaseLayout` from `@/layouts/BaseLayout.astro` with required `title` prop. Imports global styles automatically.
+
+---
+
+## 2026-01-15 - Initialize Astro project with TypeScript and Tailwind
+Task ID: task-001
+- Replaced Gridsome dependencies with Astro 5.x stack
+- Configured TypeScript strict mode via Astro's recommended preset
+- Set up @astrojs/tailwind integration
+- Created typed environment variable definitions for OfficeRnD API
+- Updated tailwind.config.js for Tailwind v3 with ESM syntax
+- Created minimal index.astro page to verify build works
+- **Files created:**
+  - `astro.config.mjs` - Astro config with static output
+  - `tsconfig.json` - TypeScript config extending Astro strict preset
+  - `src/env.d.ts` - Environment variable type definitions
+  - `src/pages/index.astro` - Minimal placeholder page
+  - `.env.example` - Environment variable template
+- **Files modified:**
+  - `package.json` - Complete rewrite for Astro dependencies
+  - `tailwind.config.js` - Updated to Tailwind v3 ESM format
+  - `.gitignore` - Added Astro-specific entries
+
+**Learnings for future iterations:**
+- Legacy Gridsome files (.vue) in src/pages cause warnings but don't break Astro build
+- Astro check reports hints for legacy JS files but these are non-blocking
+- Node 20+ required for Astro 5.x
+
+---
+
+## 2026-01-15 - Create TypeScript interfaces for API and transformed data
+Task ID: task-002
+- Created comprehensive TypeScript interfaces for the OfficeRnD Flex 2 API
+- Defined raw API interfaces: `ApiMember`, `ApiCompany`, `ApiPaginatedResponse<T>`
+- Defined transformed data interfaces: `TransformedMember`, `TransformedCompany`
+- Created utility types: `PortalPrivacy`, `SocialProfiles`, `ApiProperties`, `MemberStatus`, `CompanyStatus`
+- Added collection entry types for future Astro content collections
+- All interfaces use strict typing with no `any` types
+- **Files created:**
+  - `src/lib/types.ts` - All API and transformed data type definitions
+  - `src/lib/AGENTS.md` - Guidelines for the lib directory
+
+**Learnings for future iterations:**
+- The Flex 2 API uses `socialProfiles` object instead of separate `twitterHandle`/`linkedin` fields, but legacy fields may still exist in responses
+- Privacy fields in Flex 2 API use positive logic (`isVisible`, `showContactDetails`) while templates use negative logic (`hide`, `hideContactDetails`) - must invert when transforming
+- The `properties` object is flexible with an index signature for custom fields, but `sdg` is a known array field
+- Legacy `.vue` files trigger warnings about `@astrojs/vue` package but these are non-blocking since they will be migrated
+
+---
+
+## 2026-01-15 - Implement OfficeRnD Flex 2 API client
+Task ID: task-003
+- Implemented OAuth 2.0 client credentials flow with automatic token caching
+- Created `fetchMembers()` function with automatic pagination via `$cursorNext`
+- Created `fetchCompanies()` function with automatic pagination via `$cursorNext`
+- Added `ApiError` custom error class with status code and endpoint info
+- Added `getConfigFromEnv()` helper for reading environment variables
+- Uses native `fetch` (no axios dependency)
+- **Files created:**
+  - `src/lib/api.ts` - OfficeRnD API client with authentication and data fetching
+- **Files modified:**
+  - `src/lib/AGENTS.md` - Added API client documentation and usage patterns
+
+**Learnings for future iterations:**
+- TypeScript has trouble inferring types in `do-while` loops with generics - use explicit type annotations inside loops
+- Token caching is essential due to 5 req/min rate limit on token endpoint
+- The Flex 2 API uses `$cursorNext` query parameter (with dollar sign) for pagination
+- Response format is `{ results: T[], cursorNext?, cursorPrev?, rangeStart, rangeEnd }`
+- Native `fetch` works well in Astro - no need for axios
+
+---
+
+## 2026-01-15 - Create data transformation layer
+Task ID: task-004
+- Created transformation layer to convert raw API data to template format
+- Implemented `transformMember()` and `transformCompany()` functions
+- Implemented helper functions:
+  - `transformImageUrl()` - CloudFront to ImageKit URL conversion
+  - `calculateImagePriority()` - Sort priority based on image presence
+  - `generateSlug()` - URL-friendly slugs matching existing format
+  - `isProfileHidden()` - Privacy check with API field inversion
+  - `extractPrivacyOptions()` - Convert API privacy to template format
+  - `extractSDGs()` - Extract SDG array from properties
+  - `normalizeSocialProfiles()` - Merge new and legacy social fields
+  - `fixUrl()` - Add protocol to URLs missing it
+- Added batch functions `transformAllMembers()` and `transformAllCompanies()`
+- Hidden profiles automatically filtered during transformation
+- **Files created:**
+  - `src/lib/transform.ts` - Complete data transformation layer
+- **Files modified:**
+  - `src/lib/AGENTS.md` - Added transformation documentation
+  - `package.json` - Added slugify dependency
+
+**Learnings for future iterations:**
+- The `team` field on members may be undefined - must check before accessing
+- Legacy fields (twitterHandle, linkedin) should still be supported for backward compatibility
+- TypeScript warns about deprecated fields but this is intentional for legacy support
+- Default image URL is from cdn.prod.website-files.com, not a local asset
+- Companies use `startDate` for created date, while members use `createdAt`
+
+---
+
+## 2026-01-15 - Create BaseLayout Astro component
+Task ID: task-005
+- Created main layout component for all pages
+- Implemented HTML5 document structure with Norwegian language (`lang="nb"`)
+- Added meta tags: charset (UTF-8), viewport, favicon
+- Added Google Fonts preconnect for Poppins and Crimson Pro (weights 300, 400, 700)
+- Created global CSS file with Tailwind imports and animation classes from Default.vue
+- Layout accepts required `title` prop via typed Props interface
+- Background color: `rgb(225, 225, 219)`
+- **Files created:**
+  - `src/layouts/BaseLayout.astro` - Main layout component
+  - `src/styles/global.css` - Tailwind imports and animation classes
+  - `src/layouts/AGENTS.md` - Layout directory guidelines
+
+**Learnings for future iterations:**
+- Import global CSS in layout using `import '@/styles/global.css'` in the frontmatter
+- Astro handles font preconnect in head section (no meta framework needed)
+- Use `crossorigin` attribute (no value needed) on fonts.gstatic.com preconnect
+- Animation classes from Vue transition system migrated to global CSS for potential future use
+
+---
+
+## 2026-01-15 - Create ProfileCard Astro component
+Task ID: task-006
+- Created reusable ProfileCard component for member/team profile display
+- Props: `slug`, `name`, `image`, `teamName?`, `basePath?`
+- Image uses native `loading="lazy"` for performance
+- Members (have teamName) use `object-cover`, teams use `object-contain`
+- Text truncation via scoped `.cut-text` class (ellipsis)
+- Card dimensions: 320px width, 320px image height
+- Accessibility: aria-labels on links for screen readers
+- **Files created:**
+  - `src/components/ProfileCard.astro` - Reusable profile card component
+  - `src/components/AGENTS.md` - Components directory guidelines
+
+**Learnings for future iterations:**
+- Use `class:list` directive for conditional classes in Astro
+- Scoped styles in Astro use `<style>` without special attributes (unlike Vue's `scoped`)
+- The `basePath` prop pattern allows reuse for both members (root) and teams (/teams prefix)
+- Original Vue component had inverted logic: teamName presence = member, absence = team
+
+---
+
+## 2026-01-15 - Create utility components (TitleSection, PageSwitch)
+Task ID: task-007
+- Created TitleSection.astro for consistent page header styling
+- Created PageSwitch.astro for members/teams navigation toggle
+- TitleSection accepts `title` prop and renders h1 with font-sans, text-4xl, font-bold, leading-snug
+- PageSwitch displays two tab-like links (Medlemmer, Virksomheter) with active state highlighting
+- PageSwitch uses `Astro.url.pathname` to determine current page
+- Added `aria-current="page"` for accessibility on active tab
+- Improved from original Vue component: now shows both options as tabs instead of single link
+- **Files created:**
+  - `src/components/TitleSection.astro` - Page title component
+  - `src/components/PageSwitch.astro` - Navigation toggle component
+- **Files modified:**
+  - `src/components/AGENTS.md` - Added documentation for both components
+
+**Learnings for future iterations:**
+- Use `Astro.url.pathname` to access the current URL path in Astro components
+- Check for both `/teams` and `/teams/` when comparing paths (trailing slash handling)
+- `aria-current="page"` is the proper accessibility attribute for indicating current page in navigation
+- The original PageSwitch was a single link; enhanced version shows both options as tabs with highlighting
+- `class:list` directive works well for conditional class toggling based on state
+
+---
+
+## 2026-01-15 - Create SDG goals data file
+Task ID: task-008
+- Created data directory `src/data/` for static data files
+- Implemented SDGGoal interface with id, name, and color properties
+- Exported readonly array of all 17 UN SDGs with Norwegian names from src/filter.js
+- Added official UN SDG colors for each goal
+- Created helper functions: `getSDGById()`, `getSDGByName()`, `getSDGsByNames()`
+- Used `as const` assertion for immutability
+- **Files created:**
+  - `src/data/sdg-goals.ts` - SDG goals data with TypeScript types
+  - `src/data/AGENTS.md` - Data directory guidelines
+
+**Learnings for future iterations:**
+- SDG goal names must match exactly with values stored in member/company `properties.sdg` arrays
+- The `as const` pattern ensures array is readonly and provides better type inference
+- Helper functions like `getSDGsByNames()` are useful for converting string arrays to typed objects
+- Official UN SDG colors can be used for visual indicators in filtering UI
+
+---
+
+## 2026-01-15 - Build members listing page
+Task ID: task-009
+- Built complete members listing page with build-time data fetching
+- Implemented client-side search filtering by name and team name
+- Members sorted by priority ASC, then created DESC (images first)
+- Responsive grid using CSS Grid with `auto-fill, minmax(320px, 1fr)`
+- Renders ProfileCard components for each member
+- Uses BaseLayout, TitleSection, and PageSwitch components
+- Search uses data attributes for case-insensitive filtering
+- **Files modified:**
+  - `src/pages/index.astro` - Complete rewrite as members listing page
+
+**Learnings for future iterations:**
+- The `TransformedMember.created` field is optional (`string | undefined`) - handle with ternary when sorting
+- Client-side search in Astro uses `<script>` block with vanilla JS (no framework needed)
+- Use `data-*` attributes to pass lowercase values for case-insensitive filtering
+- CSS Grid with `auto-fill` and `justify-items: center` creates responsive card layouts
+- Astro inline scripts run after DOM is ready - no need for DOMContentLoaded listener
+
+---
+
+## 2026-01-15 - Build teams listing page
+Task ID: task-010
+- Built teams (companies) listing page following same structure as members page
+- Fetches both companies and members at build time (members needed for transformAllCompanies)
+- Teams sorted by priority ASC, then created DESC (images first)
+- Client-side search filtering by team name only
+- Uses ProfileCard with `basePath="/teams"` for proper routing
+- Responsive grid using same CSS Grid layout as members page
+- **Files created:**
+  - `src/pages/teams.astro` - Teams listing page
+
+**Learnings for future iterations:**
+- `transformAllCompanies(companies, members)` requires both datasets - use `Promise.all()` for parallel fetching
+- Teams page search is simpler than members (only searches by team name, not member names)
+- The `basePath` prop on ProfileCard routes to `/teams/[slug]` instead of `/[slug]`
+- Grid card class naming follows pattern: `member-card` for members, `team-card` for teams
+- Companies use `TransformedCompany.created` which maps from `company.startDate`
+
+---
+
+## 2026-01-15 - Create SDG filter component
+Task ID: task-011
+- Created interactive SDGFilter.astro component with all 17 UN SDGs as toggleable chips
+- Used official UN SDG colors with CSS custom property `--sdg-color` for dynamic styling
+- Implemented client-side filtering logic with Set-based state management
+- Added clear filter button with disabled state when no filters selected
+- Dispatches custom `sdg-filter-change` event on document with selectedSDGs array
+- Mobile-responsive: hides SDG names on small screens, shows only numbers
+- Full accessibility support with `aria-pressed` and `aria-label` attributes
+- **Files created:**
+  - `src/components/SDGFilter.astro` - Interactive SDG filter component
+- **Files modified:**
+  - `src/components/AGENTS.md` - Added SDGFilter documentation with integration patterns
+
+**Learnings for future iterations:**
+- Use CSS custom properties (`--sdg-color`) with inline `style` attribute for dynamic per-element colors
+- `color-mix()` CSS function allows clean hover states without JavaScript color manipulation
+- Custom events with `bubbles: true` allow flexible listener placement (on document or parent elements)
+- The `sdg-filter-change` event detail contains Norwegian SDG names matching `properties.sdg` values from API
+- For filtering: store SDG names in `data-sdgs` attribute as comma-separated string, then split and check intersection
+- Mobile-first responsive: use `@media (max-width: 640px)` to hide verbose labels, show only numbers
+
+---
+
+## 2026-01-15 - Integrate SDG filtering into listing pages
+Task ID: task-012
+- Added SDGFilter component import to both index.astro and teams.astro
+- Added SDGFilter component below search input on both pages
+- Added `data-sdgs` attribute to each card div containing comma-separated SDG names
+- Implemented combined search + SDG filtering logic in client-side scripts
+- SDG filter uses OR logic: show items matching ANY selected SDG
+- Both search and SDG filters must match for item to be visible (AND between filter types)
+- Added empty state section that shows when no items match the current filters
+- **Files modified:**
+  - `src/pages/index.astro` - Added SDGFilter, data-sdgs attrs, combined filtering logic, empty state
+  - `src/pages/teams.astro` - Added SDGFilter, data-sdgs attrs, combined filtering logic, empty state
+
+**Learnings for future iterations:**
+- Use `.filter(Boolean)` after `.split(',')` to handle empty strings from empty data-sdgs attributes
+- Track filter state in a variable outside the filter function so it persists between calls
+- Cast CustomEvent properly with `CustomEvent<{ selectedSDGs: string[] }>` for TypeScript safety
+- Empty state pattern: separate section that toggles visibility alongside the grid section
+- Combined filters pattern: check each filter condition independently, then AND them together
+
+---
+
+## 2026-01-15 - Build member detail pages
+Task ID: task-013
+- Created dynamic route `[slug].astro` for individual member profiles
+- Implemented `getStaticPaths()` to generate all member pages at build time
+- Displays full member profile: name heading, team link, large profile image, bio text
+- Respects privacy settings: contact details (phone/email) hidden when `hideContactDetails` is true
+- Respects privacy settings: social profiles hidden when `hidePublicProfiles` is true
+- Shows social links for Twitter, LinkedIn, Instagram, and Facebook (if available and visible)
+- SDG badges displayed with official UN colors using `getSDGsByNames()` helper
+- Tags displayed as gray pills similar to original Member.vue template
+- Team link navigates to `/teams/{teamSlug}` for viewing company details
+- Back link to members listing at top of page
+- **Files created:**
+  - `src/pages/[slug].astro` - Member detail page with dynamic routing
+
+**Learnings for future iterations:**
+- Use `getStaticPaths()` returning `{ params, props }` for dynamic routes in Astro
+- The member object is passed via props from getStaticPaths, no need to re-fetch in component
+- SDG colors can be applied with inline `style` attribute using `background-color: ${sdg.color}`
+- The original Member.vue used `$page.member` from GraphQL - in Astro use `Astro.props`
+- Privacy checks use the transformed `privacy.hideContactDetails` and `privacy.hidePublicProfiles` fields
+- All social profile fields (twitter, linkedin, instagram, facebook) come from `member.socialProfiles`
+
+---
+
+## 2026-01-15 - Build team detail pages
+Task ID: task-014
+- Created dynamic route `teams/[slug].astro` for individual team (company) profiles
+- Implemented `getStaticPaths()` with `Promise.all()` to fetch both companies and members in parallel
+- Displays full team profile: name heading, large logo image (object-contain), bio/description
+- Website URL link with external link icon (opens in new tab with rel="noopener noreferrer")
+- Social links (Twitter, LinkedIn, Instagram, Facebook) shown when `hidePublicProfiles` is false
+- SDG badges displayed with official UN colors using `getSDGsByNames()` helper
+- Lists all team members as blue clickable pills linking to their individual `/[slug]` pages
+- Back link to teams listing page at top
+- Uses same card-img dimensions (320x320) as member detail page for consistency
+- **Files created:**
+  - `src/pages/teams/[slug].astro` - Team detail page with dynamic routing
+
+**Learnings for future iterations:**
+- Team detail pages require `transformAllCompanies(companies, members)` which needs both datasets
+- Use nested route directory `teams/[slug].astro` for `/teams/{slug}` URL pattern
+- Team images use `object-contain` while member images use `object-cover` (teams = logos, members = photos)
+- External links should include `target="_blank" rel="noopener noreferrer"` for security
+- The `teamMembers` array from `TransformedCompany` already has `name` and `slug` for direct linking
+- Original Team.vue only showed Twitter; enhanced version shows all social profiles like member pages
+
+---
+
+## 2026-01-15 - Configure Tailwind CSS styling
+Task ID: task-015
+- Updated tailwind.config.js with comprehensive custom settings
+- Configured custom fonts: Poppins (sans), Crimson Pro (serif) with fallbacks
+- Added custom colors: `background` and `primary` with hover variant
+- Added `bg-site` utility class for the beige background (rgb(225, 225, 219))
+- Updated BaseLayout.astro to use `bg-site` Tailwind class instead of inline style
+- Verified Tailwind CSS compiles correctly with custom config
+- **Files modified:**
+  - `tailwind.config.js` - Added colors and backgroundColor extensions
+  - `src/layouts/BaseLayout.astro` - Changed body to use `bg-site` class
+
+**Learnings for future iterations:**
+- Tailwind v3.4 ESM config (`export default`) works with `@astrojs/tailwind` integration
+- Custom background colors can be added via `backgroundColor` or `colors` in extend block
+- Use `bg-site` class pattern for semantic site-level background
+- The `primary` color object with DEFAULT allows `text-primary` and `bg-primary` without suffix
+- The `npm run build` requires OfficeRnD API credentials (.env file) - typecheck passes without them
+- Tailwind CLI can test config independently: `npx tailwindcss build -c tailwind.config.js -i src/styles/global.css -o output.css`
+
+---
+
+## 2026-01-15 - Configure Netlify deployment
+Task ID: task-016
+- Created netlify.toml with complete build configuration
+- Configured build command: `npm run build`
+- Configured publish directory: `dist/`
+- Set Node.js version to 20 (matching package.json engines)
+- Added trailing slash redirect (301) to clean URLs
+- Added cache headers for static assets (_assets/, .css, .js) with 1-year max-age and immutable
+- Added security headers: X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+- Updated .env.example with comprehensive documentation for Netlify deployment
+- Removed unused OFFICERND_API_URL from env.d.ts (URL is hardcoded in api.ts)
+- No @astrojs/netlify adapter needed - pure static output works without it
+- **Files created:**
+  - `netlify.toml` - Netlify build and deployment configuration
+- **Files modified:**
+  - `.env.example` - Added Netlify deployment instructions, documented actual required vars
+  - `src/env.d.ts` - Removed unused OFFICERND_API_URL
+
+**Learnings for future iterations:**
+- Pure static Astro sites (`output: 'static'`) don't need the @astrojs/netlify adapter
+- The @astrojs/netlify adapter is only required for SSR or hybrid rendering modes
+- Netlify build requires env vars set in Netlify UI: Site settings > Environment variables
+- Token URL and API base URL are hardcoded constants in api.ts - no env vars needed for them
+- Typecheck passes without env vars, but build fails (expected - needs API credentials)
+- Build outputs to `dist/` with `_assets/` subdirectory for hashed static files
+- Use HEREDOC format in netlify.toml for multi-line values if needed
+
+---
+
+## 2026-01-15 - Remove Gridsome and Vue dependencies
+Task ID: task-017
+- Deleted all Gridsome configuration files: `gridsome.config.js`, `gridsome.server.js`
+- Deleted legacy Vue entry files: `src/main.js`, `src/filter.js`
+- Deleted all Vue components: `PageSwitch.vue`, `ProfileCard.vue`, `TitleSection.vue`
+- Deleted Vue layout: `Default.vue`
+- Deleted Vue pages: `Index.vue`, `Teams.vue`
+- Deleted `src/templates/` directory with `Member.vue` and `Team.vue`
+- Cleaned up `.gitignore` to remove "Legacy Gridsome" section (removed `.cache`, `src/.temp`, etc.)
+- Verified no .vue files remain in src/
+- Verified typecheck passes with 0 errors
+- Verified npm install works
+- **Files deleted:**
+  - `gridsome.config.js` - Gridsome build configuration
+  - `gridsome.server.js` - Gridsome server-side data loading
+  - `src/main.js` - Vue/Gridsome entry point
+  - `src/filter.js` - SDG filter data (already migrated to `src/data/sdg-goals.ts`)
+  - `src/components/PageSwitch.vue` - Vue component (replaced by Astro version)
+  - `src/components/ProfileCard.vue` - Vue component (replaced by Astro version)
+  - `src/components/TitleSection.vue` - Vue component (replaced by Astro version)
+  - `src/layouts/Default.vue` - Vue layout (replaced by `BaseLayout.astro`)
+  - `src/pages/Index.vue` - Vue page (replaced by `index.astro`)
+  - `src/pages/Teams.vue` - Vue page (replaced by `teams.astro`)
+  - `src/templates/Member.vue` - Vue template (replaced by `[slug].astro`)
+  - `src/templates/Team.vue` - Vue template (replaced by `teams/[slug].astro`)
+- **Files modified:**
+  - `.gitignore` - Removed legacy Gridsome entries
+
+**Learnings for future iterations:**
+- Package.json was already updated in task-001 - no Gridsome dependencies remained
+- The migration was complete; this task was purely cleanup of legacy files
+- Astro warnings about missing @astrojs/vue package disappear after removing .vue files
+- Typecheck result improved from 15 files + 5 hints to 15 files + 3 hints (hints are intentional deprecated field usage)
+
+---

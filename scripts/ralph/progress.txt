@@ -181,3 +181,23 @@ Task ID: task-007
 - `class:list` directive works well for conditional class toggling based on state
 
 ---
+
+## 2026-01-15 - Create SDG goals data file
+Task ID: task-008
+- Created data directory `src/data/` for static data files
+- Implemented SDGGoal interface with id, name, and color properties
+- Exported readonly array of all 17 UN SDGs with Norwegian names from src/filter.js
+- Added official UN SDG colors for each goal
+- Created helper functions: `getSDGById()`, `getSDGByName()`, `getSDGsByNames()`
+- Used `as const` assertion for immutability
+- **Files created:**
+  - `src/data/sdg-goals.ts` - SDG goals data with TypeScript types
+  - `src/data/AGENTS.md` - Data directory guidelines
+
+**Learnings for future iterations:**
+- SDG goal names must match exactly with values stored in member/company `properties.sdg` arrays
+- The `as const` pattern ensures array is readonly and provides better type inference
+- Helper functions like `getSDGsByNames()` are useful for converting string arrays to typed objects
+- Official UN SDG colors can be used for visual indicators in filtering UI
+
+---

@@ -13,6 +13,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import TitleSection from '@/components/TitleSection.astro';
 import PageSwitch from '@/components/PageSwitch.astro';
 import ProfileCard from '@/components/ProfileCard.astro';
+import SDGFilter from '@/components/SDGFilter.astro';
 import { getConfigFromEnv, fetchMembers } from '@/lib/api';
 import { transformAllMembers } from '@/lib/transform';
 import type { TransformedMember } from '@/lib/types';
@@ -47,6 +48,11 @@ members.sort((a: TransformedMember, b: TransformedMember) => {
       placeholder="Søk"
       aria-label="Søk i medlemsoversikten"
     />
+    <SDGFilter />
+  </section>
+
+  <section id="empty-state" class="hidden text-center py-12">
+    <p class="text-gray-600 font-sans text-lg">Ingen medlemmer funnet med valgte filtre.</p>
   </section>
 
   <section id="members-grid" class="cards">
@@ -55,6 +61,7 @@ members.sort((a: TransformedMember, b: TransformedMember) => {
         class="member-card"
         data-name={member.name.toLowerCase()}
         data-team={member.teamName.toLowerCase()}
+        data-sdgs={member.sdgs.join(',')}
       >
         <ProfileCard
           slug={member.slug}
@@ -86,27 +93,57 @@ members.sort((a: TransformedMember, b: TransformedMember) => {
 </style>
 
 <script>
-  // Client-side search functionality
+  // Client-side search and SDG filter functionality
   const searchInput = document.getElementById('search-input') as HTMLInputElement;
   const memberCards = document.querySelectorAll('.member-card');
+  const membersGrid = document.getElementById('members-grid') as HTMLElement;
+  const emptyState = document.getElementById('empty-state') as HTMLElement;
+
+  // Track current SDG filter state
+  let selectedSDGs: string[] = [];
 
   function filterMembers(): void {
     const searchTerm = searchInput.value.toLowerCase().trim();
+    let visibleCount = 0;
 
     memberCards.forEach((card) => {
       const name = card.getAttribute('data-name') ?? '';
       const team = card.getAttribute('data-team') ?? '';
+      const cardSDGs = card.getAttribute('data-sdgs')?.split(',').filter(Boolean) ?? [];
 
-      const matchesName = name.includes(searchTerm);
-      const matchesTeam = team.includes(searchTerm);
+      // Search filter: match name or team
+      const matchesSearch = searchTerm === '' || name.includes(searchTerm) || team.includes(searchTerm);
 
-      if (searchTerm === '' || matchesName || matchesTeam) {
+      // SDG filter: match ANY selected SDG (OR logic), or show all if no SDGs selected
+      const matchesSDG = selectedSDGs.length === 0 ||
+        selectedSDGs.some((sdg: string) => cardSDGs.includes(sdg));
+
+      // Both filters must match
+      if (matchesSearch && matchesSDG) {
         card.classList.remove('hidden');
+        visibleCount++;
       } else {
         card.classList.add('hidden');
       }
     });
+
+    // Show/hide empty state
+    if (visibleCount === 0) {
+      membersGrid.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+    } else {
+      membersGrid.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+    }
   }
 
+  // Listen for search input
   searchInput.addEventListener('input', filterMembers);
+
+  // Listen for SDG filter changes
+  document.addEventListener('sdg-filter-change', (event) => {
+    const customEvent = event as CustomEvent<{ selectedSDGs: string[] }>;
+    selectedSDGs = customEvent.detail.selectedSDGs;
+    filterMembers();
+  });
 </script>

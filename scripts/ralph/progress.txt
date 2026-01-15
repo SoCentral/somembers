@@ -266,3 +266,25 @@ Task ID: task-011
 - Mobile-first responsive: use `@media (max-width: 640px)` to hide verbose labels, show only numbers
 
 ---
+
+## 2026-01-15 - Integrate SDG filtering into listing pages
+Task ID: task-012
+- Added SDGFilter component import to both index.astro and teams.astro
+- Added SDGFilter component below search input on both pages
+- Added `data-sdgs` attribute to each card div containing comma-separated SDG names
+- Implemented combined search + SDG filtering logic in client-side scripts
+- SDG filter uses OR logic: show items matching ANY selected SDG
+- Both search and SDG filters must match for item to be visible (AND between filter types)
+- Added empty state section that shows when no items match the current filters
+- **Files modified:**
+  - `src/pages/index.astro` - Added SDGFilter, data-sdgs attrs, combined filtering logic, empty state
+  - `src/pages/teams.astro` - Added SDGFilter, data-sdgs attrs, combined filtering logic, empty state
+
+**Learnings for future iterations:**
+- Use `.filter(Boolean)` after `.split(',')` to handle empty strings from empty data-sdgs attributes
+- Track filter state in a variable outside the filter function so it persists between calls
+- Cast CustomEvent properly with `CustomEvent<{ selectedSDGs: string[] }>` for TypeScript safety
+- Empty state pattern: separate section that toggles visibility alongside the grid section
+- Combined filters pattern: check each filter condition independently, then AND them together
+
+---

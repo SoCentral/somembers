@@ -1,21 +1,112 @@
 ---
-// SoCentral Members - Astro Index Page
+/**
+ * Members Listing Page
+ *
+ * Displays all non-hidden members in a responsive grid.
+ * Features:
+ * - Build-time data fetching from OfficeRnD API
+ * - Client-side search filtering by name and team name
+ * - Sorted by priority ASC, then createdAt DESC
+ */
+
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import TitleSection from '@/components/TitleSection.astro';
+import PageSwitch from '@/components/PageSwitch.astro';
+import ProfileCard from '@/components/ProfileCard.astro';
+import { getConfigFromEnv, fetchMembers } from '@/lib/api';
+import { transformAllMembers } from '@/lib/transform';
+import type { TransformedMember } from '@/lib/types';
+
+// Fetch and transform members at build time
+const config = getConfigFromEnv();
+const rawMembers = await fetchMembers(config);
+const members = transformAllMembers(rawMembers);
+
+// Sort by priority ASC, then by created DESC
+members.sort((a: TransformedMember, b: TransformedMember) => {
+  // First sort by priority (lower number = higher priority)
+  if (a.priority !== b.priority) {
+    return a.priority - b.priority;
+  }
+  // Then sort by created date (newer first)
+  // Handle undefined created dates by treating them as oldest
+  const dateA = a.created ? new Date(a.created).getTime() : 0;
+  const dateB = b.created ? new Date(b.created).getTime() : 0;
+  return dateB - dateA;
+});
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SoCentral Members</title>
-    <link rel="icon" type="image/png" href="/favicon.png" />
-  </head>
-  <body class="font-sans">
-    <main class="min-h-screen flex items-center justify-center bg-gray-50">
-      <div class="text-center">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">SoCentral Members</h1>
-        <p class="text-gray-600">Astro migration in progress</p>
+<BaseLayout title="Hjem - SoCentral Members">
+  <section class="container w-full mt-20 mb-10 lg:my-10 lg:w-3/5 lg:mx-auto lg:text-center">
+    <TitleSection title="Våre medlemmer" />
+    <PageSwitch />
+    <input
+      id="search-input"
+      class="block lg:mx-auto font-sans mb-4 w-full md:w-64 border border-gray-500 rounded py-2 px-2 text-gray-800 focus:outline-none focus:border-green-900"
+      type="text"
+      placeholder="Søk"
+      aria-label="Søk i medlemsoversikten"
+    />
+  </section>
+
+  <section id="members-grid" class="cards">
+    {members.map((member: TransformedMember) => (
+      <div
+        class="member-card"
+        data-name={member.name.toLowerCase()}
+        data-team={member.teamName.toLowerCase()}
+      >
+        <ProfileCard
+          slug={member.slug}
+          name={member.name}
+          image={member.image}
+          teamName={member.teamName}
+        />
       </div>
-    </main>
-  </body>
-</html>
+    ))}
+  </section>
+</BaseLayout>
+
+<style>
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    justify-items: center;
+    padding: 0 1rem 2rem;
+  }
+
+  .member-card {
+    transition: opacity 0.3s ease;
+  }
+
+  .member-card.hidden {
+    display: none;
+  }
+</style>
+
+<script>
+  // Client-side search functionality
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const memberCards = document.querySelectorAll('.member-card');
+
+  function filterMembers(): void {
+    const searchTerm = searchInput.value.toLowerCase().trim();
+
+    memberCards.forEach((card) => {
+      const name = card.getAttribute('data-name') ?? '';
+      const team = card.getAttribute('data-team') ?? '';
+
+      const matchesName = name.includes(searchTerm);
+      const matchesTeam = team.includes(searchTerm);
+
+      if (searchTerm === '' || matchesName || matchesTeam) {
+        card.classList.remove('hidden');
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+  }
+
+  searchInput.addEventListener('input', filterMembers);
+</script>

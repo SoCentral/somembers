@@ -68,7 +68,7 @@
       "id": "task-008",
       "title": "Create SDG goals data file",
       "description": "Create the data file with 17 UN Sustainable Development Goals for filtering.\n\n**What to do:**\n- Create sdg-goals.ts with goal definitions\n- Export array of goals with Norwegian names\n- Include type definitions\n\n**Files to create:**\n- src/data/sdg-goals.ts\n\n**Data structure (from filter.js):**\n- Array of 17 SDG goals\n- Each goal has: id, name (Norwegian), possibly icon/color\n- Goals: Utrydde satisfying, Utrydde sult, God helse, etc.\n\n**Acceptance criteria:**\n- All 17 UN SDGs included\n- Names in Norwegian matching current site\n- Proper TypeScript types\n- npm run typecheck passes\n\n**Notes:**\n- Copy goal names from src/filter.js\n- Add proper TypeScript interface for SDGGoal",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-001"],
       "parentId": "astro-migration-001"
     },

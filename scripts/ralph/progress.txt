@@ -201,3 +201,24 @@ Task ID: task-008
 - Official UN SDG colors can be used for visual indicators in filtering UI
 
 ---
+
+## 2026-01-15 - Build members listing page
+Task ID: task-009
+- Built complete members listing page with build-time data fetching
+- Implemented client-side search filtering by name and team name
+- Members sorted by priority ASC, then created DESC (images first)
+- Responsive grid using CSS Grid with `auto-fill, minmax(320px, 1fr)`
+- Renders ProfileCard components for each member
+- Uses BaseLayout, TitleSection, and PageSwitch components
+- Search uses data attributes for case-insensitive filtering
+- **Files modified:**
+  - `src/pages/index.astro` - Complete rewrite as members listing page
+
+**Learnings for future iterations:**
+- The `TransformedMember.created` field is optional (`string | undefined`) - handle with ternary when sorting
+- Client-side search in Astro uses `<script>` block with vanilla JS (no framework needed)
+- Use `data-*` attributes to pass lowercase values for case-insensitive filtering
+- CSS Grid with `auto-fill` and `justify-items: center` creates responsive card layouts
+- Astro inline scripts run after DOM is ready - no need for DOMContentLoaded listener
+
+---

@@ -13,6 +13,7 @@ Parent Task: astro-migration-001
 - **API Client**: Use `getConfigFromEnv()` for config, then `fetchMembers(config)` and `fetchCompanies(config)` for data. Pagination handled automatically.
 - **Data Transform**: Use `transformAllMembers(members)` and `transformAllCompanies(companies, members)` to process API data. Hidden profiles filtered automatically.
 - **Slugify**: Use `slugify` package with `{ lower: true, remove: /[*+~.()/'"?!:@]/g }` to match existing URL format
+- **Layouts**: Use `BaseLayout` from `@/layouts/BaseLayout.astro` with required `title` prop. Imports global styles automatically.
 
 ---
 
@@ -111,5 +112,27 @@ Task ID: task-004
 - TypeScript warns about deprecated fields but this is intentional for legacy support
 - Default image URL is from cdn.prod.website-files.com, not a local asset
 - Companies use `startDate` for created date, while members use `createdAt`
+
+---
+
+## 2026-01-15 - Create BaseLayout Astro component
+Task ID: task-005
+- Created main layout component for all pages
+- Implemented HTML5 document structure with Norwegian language (`lang="nb"`)
+- Added meta tags: charset (UTF-8), viewport, favicon
+- Added Google Fonts preconnect for Poppins and Crimson Pro (weights 300, 400, 700)
+- Created global CSS file with Tailwind imports and animation classes from Default.vue
+- Layout accepts required `title` prop via typed Props interface
+- Background color: `rgb(225, 225, 219)`
+- **Files created:**
+  - `src/layouts/BaseLayout.astro` - Main layout component
+  - `src/styles/global.css` - Tailwind imports and animation classes
+  - `src/layouts/AGENTS.md` - Layout directory guidelines
+
+**Learnings for future iterations:**
+- Import global CSS in layout using `import '@/styles/global.css'` in the frontmatter
+- Astro handles font preconnect in head section (no meta framework needed)
+- Use `crossorigin` attribute (no value needed) on fonts.gstatic.com preconnect
+- Animation classes from Vue transition system migrated to global CSS for potential future use
 
 ---

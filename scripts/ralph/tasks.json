@@ -36,7 +36,7 @@
       "id": "task-004",
       "title": "Create data transformation layer",
       "description": "Transform raw API data into the format needed for rendering.\n\n**What to do:**\n- Implement transformMember() function\n- Implement transformCompany() function\n- Implement helper functions for images, slugs, privacy, SDGs\n\n**Files to create:**\n- src/lib/transform.ts\n\n**Transformation logic (from gridsome.server.js):**\n- Images: Convert CloudFront URLs to ImageKit format\n  - Pattern: https://ik.imagekit.io/socentral/ + path + ?tr=h-640\n  - Default fallback for null images\n- Slugs: Use slugify with options { lower: true, remove: /[*+~.()'\"?!:@]/g }\n- Priority: 1 for images starting with // or twitter, 2 for other images, 3 for no image\n- Privacy: Filter out items where portalPrivacy.hide is true\n- Privacy flags: Extract hideContactDetails, hidePublicProfiles\n- SDGs: Extract from properties.sdg array\n- Social: Extract from socialProfiles object\n\n**Acceptance criteria:**\n- transformMember() returns TransformedMember with all fields\n- transformCompany() returns TransformedCompany with all fields\n- Hidden profiles are filtered out\n- Image URLs are correctly transformed\n- Slugs match current site format\n- npm run typecheck passes\n\n**Notes:**\n- Install slugify package\n- Verify properties.sdg structure in actual API response",
-      "status": "open",
+      "status": "completed",
       "dependsOn": ["task-003"],
       "parentId": "astro-migration-001"
     },

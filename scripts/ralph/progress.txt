@@ -136,3 +136,24 @@ Task ID: task-005
 - Animation classes from Vue transition system migrated to global CSS for potential future use
 
 ---
+
+## 2026-01-15 - Create ProfileCard Astro component
+Task ID: task-006
+- Created reusable ProfileCard component for member/team profile display
+- Props: `slug`, `name`, `image`, `teamName?`, `basePath?`
+- Image uses native `loading="lazy"` for performance
+- Members (have teamName) use `object-cover`, teams use `object-contain`
+- Text truncation via scoped `.cut-text` class (ellipsis)
+- Card dimensions: 320px width, 320px image height
+- Accessibility: aria-labels on links for screen readers
+- **Files created:**
+  - `src/components/ProfileCard.astro` - Reusable profile card component
+  - `src/components/AGENTS.md` - Components directory guidelines
+
+**Learnings for future iterations:**
+- Use `class:list` directive for conditional classes in Astro
+- Scoped styles in Astro use `<style>` without special attributes (unlike Vue's `scoped`)
+- The `basePath` prop pattern allows reuse for both members (root) and teams (/teams prefix)
+- Original Vue component had inverted logic: teamName presence = member, absence = team
+
+---

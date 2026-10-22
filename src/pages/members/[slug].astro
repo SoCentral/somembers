@@ -1,0 +1,78 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  const members = await getCollection("members");
+  return members.map((member) => ({
+    params: { slug: member.data.slug },
+    props: { member },
+  }));
+}
+
+const { member } = Astro.props;
+const d = member.data;
+---
+
+<Layout
+  title={`${d.name} – SoCentral`}
+  backHref="/"
+  backLabel="Tilbake til medlemmer"
+>
+  <article class="member-detail">
+    <h1>{d.name}</h1>
+    {d.teamName && (
+      <a
+        href={d.teamSlug ? `/companies/${d.teamSlug}` : "/companies"}
+        class="member-company"
+        aria-label={`Les mer om ${d.teamName}`}
+      >
+        {d.teamName}
+      </a>
+    )}
+
+    <div class="member-body">
+      <img
+        src={d.image ?? "https://cdn.prod.website-files.com/633d71ff5625100570e7e68c/68f8d711d95a532bded7c6c3_default.png"}
+        alt={d.name}
+        class="member-img"
+      />
+      {d.description && <p class="member-bio">{d.description}</p>}
+    </div>
+
+    <div class="member-contacts">
+      {d.phone && (
+        <a href={`tel:${d.phone}`} class="contact-btn" aria-label="Ring med telefon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.48 22.926l-1.193.658c-6.979 3.621-19.082-17.494-12.279-21.484l1.145-.637 3.714 6.467-1.139.632c-2.067 1.245 2.76 9.707 4.879 8.545l1.162-.642 3.711 6.461zm-9.808-22.926l-1.68.975 3.714 6.466 1.681-.975-3.715-6.466zm8.613 14.997l-1.68.975 3.714 6.467 1.681-.975-3.715-6.467z"/>
+          </svg>
+        </a>
+      )}
+      {d.email && (
+        <a href={`mailto:${d.email}`} class="contact-btn" aria-label="Send epost">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 12.713l-11.985-9.713h23.97l-11.985 9.713zm0 2.574l-12-9.725v15.438h24v-15.438l-12 9.725z"/>
+          </svg>
+        </a>
+      )}
+      {d.linkedin && (
+        <a href={d.linkedin} class="contact-btn" target="_blank" rel="noreferrer" aria-label="Se LinkedIn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+          </svg>
+        </a>
+      )}
+    </div>
+
+    {d.tags && d.tags.length > 0 && (
+      <div class="member-tags">
+        <h3>Tags</h3>
+        <ul>
+          {d.tags.map((tag: string) => (
+            <li>{tag}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </article>
+</Layout>

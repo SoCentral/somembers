@@ -1,0 +1,64 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../layouts/Layout.astro";
+
+const companies = await getCollection("teams");
+---
+
+<Layout title="Våre virksomheter – SoCentral">
+  <section class="page-section">
+    <h1>Våre virksomheter</h1>
+    <a class="page-switch" href="/">Se medlemmer</a>
+    <input
+      id="search"
+      type="search"
+      placeholder="Søk"
+      autocomplete="off"
+      aria-label="Søk i oversikten over virksomheter"
+    />
+  </section>
+
+  <section id="grid" class="cards teams">
+    {
+      companies.map((company) => (
+        <a
+          href={`/companies/${company.data.slug}`}
+          class="card"
+          data-name={company.data.name.toLowerCase()}
+          aria-label={`Les mer om ${company.data.name}`}
+        >
+          <div class="card-img-wrap">
+            <img
+              src={company.data.image ?? "https://cdn.prod.website-files.com/633d71ff5625100570e7e68c/68f8d711d95a532bded7c6c3_default.png"}
+              alt={`Bilde av ${company.data.name}`}
+              loading="lazy"
+            />
+          </div>
+          <span class="card-name">{company.data.name}</span>
+        </a>
+      ))
+    }
+  </section>
+
+  <p id="no-results" hidden>Ingen treff.</p>
+</Layout>
+
+<script>
+  const search = document.getElementById("search") as HTMLInputElement;
+  const cards = document.querySelectorAll<HTMLElement>("#grid .card");
+  const noResults = document.getElementById("no-results") as HTMLElement;
+
+  search.addEventListener("input", () => {
+    const q = search.value.trim().toLowerCase();
+    let visible = 0;
+
+    cards.forEach((card) => {
+      const name = card.dataset.name ?? "";
+      const match = !q || name.includes(q);
+      card.hidden = !match;
+      if (match) visible++;
+    });
+
+    noResults.hidden = visible > 0;
+  });
+</script>

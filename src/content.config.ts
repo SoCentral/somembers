@@ -30,7 +30,6 @@ async function getOfficeRnDToken() {
     grant_type: "client_credentials",
     client_id: import.meta.env.CLIENT_ID || "",
     client_secret: import.meta.env.CLIENT_SECRET || "",
-    scope: "flex.community.members.read flex.community.companies.read",
   });
   const res = await axios.post(
     "https://identity.officernd.com/oauth/token",

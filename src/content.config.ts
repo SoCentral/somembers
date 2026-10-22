@@ -28,8 +28,8 @@ const proxyImage = (url: string | null) => {
 async function getOfficeRnDToken() {
   const params = new URLSearchParams({
     grant_type: "client_credentials",
-    client_id: process.env.CLIENT_ID || import.meta.env.CLIENT_ID || "",
-    client_secret: process.env.CLIENT_SECRET || import.meta.env.CLIENT_SECRET || "",
+    client_id: import.meta.env.CLIENT_ID || "",
+    client_secret: import.meta.env.CLIENT_SECRET || "",
   });
   const res = await axios.post(
     "https://identity.officernd.com/oauth/token",

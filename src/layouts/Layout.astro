@@ -6,6 +6,15 @@ interface Props {
 }
 
 const { title, backHref, backLabel } = Astro.props;
+
+// Fontene ligger paa vaart eget domene i stedet for Google Fonts.
+// Det fjerner en blokkerende foresporsel og en ekstra kjede (CSS -> fontfil).
+// Bare latin-tegnsettet (inkluderer aeoeaa) og vektene som faktisk brukes.
+import "@fontsource/poppins/latin-300.css";
+import "@fontsource/poppins/latin-400.css";
+import "@fontsource/poppins/latin-700.css";
+import "@fontsource/crimson-pro/latin-300.css";
+import "@fontsource/crimson-pro/latin-300-italic.css";
 ---
 
 <!doctype html>
@@ -14,19 +23,13 @@ const { title, backHref, backLabel } = Astro.props;
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" type="image/png" href="/favicon.png" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;700&family=Poppins:wght@300;400;700&display=swap"
-        />
         <link rel="preconnect" href="https://ik.imagekit.io" />
         <title>{title}</title>
     </head>
     <body>
         <header class="site-header">
             <a href="/" class="logo" aria-label="SoCentral – til forsiden">
-                <img src="/logo.png" alt="SoCentral logo" class="logo-img" />
+                <img src="/logo.png" alt="SoCentral logo" class="logo-img" width="320" height="120" />
             </a>
             <a
                 href="https://www.socentral.no/medlem"
@@ -87,7 +90,7 @@ const { title, backHref, backLabel } = Astro.props;
 
     .logo { margin-right: auto; display: block; }
 
-    .logo-img { width: 8rem; display: block; }
+    .logo-img { width: 8rem; height: auto; display: block; }
 
     .btn-member {
         background-color: #2b6cb0;

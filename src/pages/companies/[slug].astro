@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
+import { imageAttrs } from "../../lib/images";
 
 export async function getStaticPaths() {
   const companies = await getCollection("teams");
@@ -24,7 +25,8 @@ const d = company.data;
 
     <div class="company-body">
       <img
-        src={d.image ?? "https://cdn.prod.website-files.com/633d71ff5625100570e7e68c/68f8d711d95a532bded7c6c3_default.png"}
+        {...imageAttrs(d.image, "contain")}
+        fetchpriority="high"
         alt={d.name}
         class="company-img"
       />

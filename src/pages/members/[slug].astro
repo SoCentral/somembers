@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
+import { imageAttrs } from "../../lib/images";
 
 export async function getStaticPaths() {
   const members = await getCollection("members");
@@ -33,7 +34,8 @@ const d = member.data;
 
     <div class="member-body">
       <img
-        src={d.image ?? "https://cdn.prod.website-files.com/633d71ff5625100570e7e68c/68f8d711d95a532bded7c6c3_default.png"}
+        {...imageAttrs(d.image, "cover")}
+        fetchpriority="high"
         alt={d.name}
         class="member-img"
       />

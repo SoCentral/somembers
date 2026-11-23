@@ -1,8 +1,13 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../layouts/Layout.astro";
+import { imageAttrs } from "../lib/images";
 
 const members = await getCollection("members");
+
+// Kortene som er synlige uten aa scrolle lastes med en gang (ikke lazy),
+// slik at det storste bildet (LCP) oppdages tidlig.
+const EAGER_COUNT = 4;
 ---
 
 <Layout title="Våre medlemmer – SoCentral">
@@ -20,7 +25,7 @@ const members = await getCollection("members");
 
   <section id="grid" class="cards">
     {
-      members.map((member) => (
+      members.map((member, i) => (
         <a
           href={`/members/${member.data.slug}`}
           class="card"
@@ -30,9 +35,11 @@ const members = await getCollection("members");
         >
           <div class="card-img-wrap">
             <img
-              src={member.data.image ?? "https://cdn.prod.website-files.com/633d71ff5625100570e7e68c/68f8d711d95a532bded7c6c3_default.png"}
+              {...imageAttrs(member.data.image, "cover")}
               alt={`Bilde av ${member.data.name}`}
-              loading="lazy"
+              loading={i < EAGER_COUNT ? "eager" : "lazy"}
+              fetchpriority={i === 0 ? "high" : undefined}
+              decoding="async"
             />
           </div>
           <span class="card-name">{member.data.name}</span>

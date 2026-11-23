@@ -22,7 +22,8 @@ const sortDirectory = (a: any, b: any) => {
 const proxyImage = (url: string | null) => {
   if (!url || url.includes("default.png")) return null;
   const path = url.replace(/^.*cloudfront\.net\//, "");
-  return `https://ik.imagekit.io/socentral/${path}?tr=h-640`;
+  // Storrelse og format legges paa i src/lib/images.ts
+  return `https://ik.imagekit.io/socentral/${path}`;
 };
 
 async function getOfficeRnDToken() {

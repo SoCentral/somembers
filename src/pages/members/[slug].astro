@@ -17,6 +17,7 @@ const d = member.data;
 
 <Layout
   title={`${d.name} – SoCentral`}
+  description={d.description || `${d.name} er medlem i SoCentral${d.teamName ? ` og jobber i ${d.teamName}` : ""}.`}
   backHref="/"
   backLabel="Tilbake til medlemmer"
 >

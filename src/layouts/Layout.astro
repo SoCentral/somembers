@@ -1,11 +1,23 @@
 ---
 interface Props {
     title: string;
+    description?: string;
     backHref?: string;
     backLabel?: string;
 }
 
-const { title, backHref, backLabel } = Astro.props;
+const { title, description, backHref, backLabel } = Astro.props;
+
+// Meta description vises ofte under tittelen i sokeresultater.
+// Google viser rundt 155 tegn, saa lengre tekst kortes ned ved et ordskille.
+const DEFAULT_DESCRIPTION =
+    "Bli kjent med medlemmene og virksomhetene i SoCentral, et fellesskap for sosiale entreprenører og samfunnsaktører.";
+const MAX_LENGTH = 155;
+const clean = (description ?? DEFAULT_DESCRIPTION).replace(/\s+/g, " ").trim();
+const metaDescription =
+    clean.length <= MAX_LENGTH
+        ? clean
+        : clean.slice(0, MAX_LENGTH).replace(/\s+\S*$/, "") + "...";
 
 // Fontene ligger paa vaart eget domene i stedet for Google Fonts.
 // Det fjerner en blokkerende foresporsel og en ekstra kjede (CSS -> fontfil).
@@ -25,6 +37,7 @@ import "@fontsource/crimson-pro/latin-300-italic.css";
         <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="preconnect" href="https://ik.imagekit.io" />
         <title>{title}</title>
+        <meta name="description" content={metaDescription} />
     </head>
     <body>
         <header class="site-header">
